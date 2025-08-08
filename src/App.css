@@ -23,13 +23,13 @@ body, html {
 }
 
 .desktop-icon {
-  width: 70px; /* Smaller than dock but big enough for text */
-  height: 80px; /* Smaller than dock but big enough for text */
+  width: 85px; /* Increased from 70px to accommodate longer text */
+  height: 80px; /* Keep height the same */
   margin: 0px 15px;
   text-align: center;
   color: white;
   cursor: pointer;
-  font-size: 14px; /* Smaller text than dock (17px) */
+  font-size: 14px;
   transition: transform 0.3s ease;
   display: flex;
   flex-direction: column;

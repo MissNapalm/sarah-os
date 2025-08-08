@@ -146,21 +146,38 @@ const Window = ({ title, content, onClose }) => {
         className="resize-handle"
         style={{
           position: "absolute",
-          bottom: "2px",
-          right: "2px",
-          width: "18px",
-          height: "18px",
+          bottom: "8px",
+          right: "8px",
+          width: "80px",
+          height: "24px",
           cursor: "se-resize",
           zIndex: 1001,
-          background: "rgba(255, 255, 255, 0.6)",
-          borderRadius: "0 0 14px 0",
+          background: "linear-gradient(135deg, rgba(74, 144, 226, 0.8), rgba(56, 119, 238, 0.9))",
+          borderRadius: "12px",
           opacity: 0.7,
-          transition: "opacity 0.2s ease"
+          transition: "all 0.3s ease",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "10px",
+          color: "white",
+          fontWeight: "500",
+          textShadow: "0 1px 2px rgba(0, 0, 0, 0.3)",
+          border: "1px solid rgba(255, 255, 255, 0.2)",
+          backdropFilter: "blur(4px)"
         }}
         onMouseDown={handleResizeStart}
-        onMouseEnter={(e) => e.target.style.opacity = "1"}
-        onMouseLeave={(e) => e.target.style.opacity = "0.7"}
-      />
+        onMouseEnter={(e) => {
+          e.target.style.opacity = "1";
+          e.target.style.transform = "scale(1.05)";
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.opacity = "0.7";
+          e.target.style.transform = "scale(1)";
+        }}
+      >
+        ↘ drag here
+      </div>
     </div>
   );
 };

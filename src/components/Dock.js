@@ -109,7 +109,6 @@ const Dock = ({ apps, onAppClick }) => {
                   width: "35px",
                   height: "45px",
                   borderRadius: "50%",
-                  imageRendering: "-webkit-optimize-contrast",
                   imageRendering: "optimizeQuality",
                   filter: "contrast(1.02) brightness(1.02)",
                   transform: "translateZ(0)",

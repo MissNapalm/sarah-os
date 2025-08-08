@@ -76,29 +76,9 @@ const App = () => {
         </div>
       );
     } else if (app.name === "My Resume") {
-      // EASTER EGG: Rickroll (placeholder until GIF is added)
-      content = (
-        <div style={{ textAlign: "center", padding: "20px" }}>
-          <h2>The only web page you need</h2>
-          <div style={{
-            background: "#000",
-            color: "#00ff00",
-            padding: "20px",
-            borderRadius: "10px",
-            fontFamily: "monospace",
-            fontSize: "18px",
-            lineHeight: "1.8"
-          }}>
-            <p>🎵 Never gonna give you up 🎵</p>
-            <p>🎵 Never gonna let you down 🎵</p>
-            <p>🎵 Never gonna run around and desert you 🎵</p>
-            <br/>
-            <p style={{ fontSize: "14px", opacity: 0.7 }}>
-              (Add rickroll.gif to /public folder for the full experience!)
-            </p>
-          </div>
-        </div>
-      );
+      // Open resume in new tab
+      window.open('https://flowcv.com/resume/u2ckr5r2ktsk', '_blank');
+      return; // Don't create a window, just open the link
     } else if (app.name === "Downloads") {
       // EASTER EGG: "The Game" joke with fake files
       content = (
