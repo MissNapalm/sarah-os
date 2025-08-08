@@ -11,6 +11,7 @@ import {
   NonprofitContent,
   SettingsContent,
 } from "./components/WindowContent";
+import wallpaperImage from "./wallpaper.jpg";
 import "./App.css";
 
 const App = () => {
@@ -168,7 +169,7 @@ const App = () => {
   };
 
   return (
-    <div className="desktop">
+    <div className="desktop" style={{ backgroundImage: `url(${wallpaperImage})` }}>
       {/* Boot Screen */}
       {!booted && (
         <div
