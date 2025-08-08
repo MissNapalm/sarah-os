@@ -164,19 +164,27 @@ const App = () => {
       console.log("Boot sound immediate play error:", error);
     }
 
-    // Start fade-in sequence
-    setTimeout(() => setFadeInStage(1), 500); // Fade in SarahOS text after 500ms
-    setTimeout(() => setFadeInStage(2), 2500); // Fade in desktop icons after 2500ms (2 seconds after text)
-    setTimeout(() => setFadeInStage(3), 4500); // Fade in dock after 4500ms (2 seconds after icons)
+    // Start fade-in sequence - SarahOS text appears IMMEDIATELY
+    setFadeInStage(1); // Fade in SarahOS text RIGHT NOW - no setTimeout
+    setTimeout(() => setFadeInStage(2), 600); // Icons at 0.6 seconds 
+    setTimeout(() => setFadeInStage(3), 1200); // Dock at 0.7 seconds
 
     // Fade out the black screen and make the button disappear
-    setTimeout(() => setBlackScreenOpacity(0), 800); // Start fading out the black screen
+    setTimeout(() => setBlackScreenOpacity(0), 200); // Start fading out the black screen
     setTimeout(() => setButtonVisible(false), 100); // Hide the button visually
-    setTimeout(() => setBooted(true), 6000); // Remove the black screen after dock animation completes
+    setTimeout(() => setBooted(true), 2900); // Remove the black screen after all animations complete
   };
 
   return (
-    <div className="desktop" style={{ backgroundImage: `url(${wallpaperImage})` }}>
+    <div 
+      className="desktop" 
+      style={{ 
+        backgroundImage: `url(${wallpaperImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
       {/* Boot Screen */}
       {!booted && (
         <div
@@ -216,7 +224,7 @@ const App = () => {
         className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center"
         style={{
           opacity: fadeInStage >= 1 ? 1 : 0,
-          transition: "opacity 2s ease-in-out",
+          transition: "none",
           zIndex: 40,
         }}
       >
@@ -316,7 +324,7 @@ const App = () => {
       </div>
 
       {/* Windows */}
-      {fadeInStage >= 3 &&
+      {fadeInStage >= 2 &&
         windows.map((win) => (
           <Window
             key={win.id}
