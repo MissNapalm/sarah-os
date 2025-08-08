@@ -44,7 +44,7 @@ const Window = ({ title, content, onClose }) => {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [dragging, resizing, position.x, position.y]);
+  }, [dragging, resizing, position.x, position.y, size.width, size.height]);
 
   const handleMouseDown = (e) => {
     if (e.target.closest('.window-header-buttons') || e.target.closest('.resize-handle')) return;

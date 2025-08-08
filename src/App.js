@@ -130,7 +130,8 @@ const App = () => {
     const newY = newIcons[iconIndex].position.y + e.movementY;
 
     if (newY < dockHeight) {
-      newIcons[iconIndex].position.y = newIcons[iconIndex].position.y;
+      // Don't move the icon into the dock area - keep Y position unchanged
+      newIcons[iconIndex].position.x = newX;
     } else {
       newIcons[iconIndex].position.x = newX;
       newIcons[iconIndex].position.y = newY;
