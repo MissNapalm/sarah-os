@@ -23,10 +23,10 @@ const App = () => {
     { id: 3, name: "Downloads", icon: "⬇️", content: "Downloads Content", position: { x: 20, y: 330 } },
     { id: 4, name: "Recycle Bin", icon: "🗑️", content: "I'm out of cute easter egg ideas...for now. Until then, enjoy this empty space XD", position: { x: 20, y: 430 } },
   ]);
-  const [booted, setBooted] = useState(false); // Controls the boot sequence
-  const [fadeInStage, setFadeInStage] = useState(0); // Tracks which elements are fading in
-  const [buttonVisible, setButtonVisible] = useState(true); // Controls the button visibility
-  const [blackScreenOpacity, setBlackScreenOpacity] = useState(1); // Controls the black screen fade-out
+  const [booted, setBooted] = useState(true); // Controls the boot sequence - TEMPORARILY SET TO TRUE
+  const [fadeInStage, setFadeInStage] = useState(3); // Tracks which elements are fading in - SHOW ALL ELEMENTS
+  const [buttonVisible, setButtonVisible] = useState(false); // Controls the button visibility
+  const [blackScreenOpacity, setBlackScreenOpacity] = useState(0); // Controls the black screen fade-out
   // Sound configurations
   const bootSound = new Howl({
     src: ["/bootup.mp3"],
