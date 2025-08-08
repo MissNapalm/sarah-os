@@ -39,7 +39,21 @@ const Dock = ({ apps, onAppClick }) => {
     } catch (error) {
       console.log("Click sound error:", error);
     }
-    onAppClick(app); // Trigger the app click logic
+    // Only trigger for non-resume apps on single click
+    if (app.name !== "My Resume") {
+      onAppClick(app);
+    }
+  };
+
+  const handleAppDoubleClick = (app) => {
+    console.log("Dock icon double-clicked");
+    if (app.name === "My Resume") {
+      // Open resume in new tab for double-click
+      window.open('https://flowcv.com/resume/u2ckr5r2ktsk', '_blank');
+    } else {
+      // For other apps, trigger normal window opening
+      onAppClick(app);
+    }
   };
 
   const handleMouseEnter = (index) => {
@@ -75,6 +89,7 @@ const Dock = ({ apps, onAppClick }) => {
           key={index}
           className="dock-icon-container"
           onClick={() => handleAppClick(app)} // Use the handleAppClick function
+          onDoubleClick={() => handleAppDoubleClick(app)} // Handle double-click events
           onMouseEnter={() => handleMouseEnter(index)} // Trigger hover sound
           onMouseLeave={handleMouseLeave} // Reset hover state
           style={{

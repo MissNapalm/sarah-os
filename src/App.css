@@ -23,8 +23,8 @@ body, html {
 }
 
 .desktop-icon {
-  width: 85px; /* Increased from 70px to accommodate longer text */
-  height: 80px; /* Keep height the same */
+  width: 95px; /* Increased further to accommodate wrapped text */
+  height: 90px; /* Increased height for wrapped text */
   margin: 0px 15px;
   text-align: center;
   color: white;
