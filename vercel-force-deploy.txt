@@ -1,0 +1,3 @@
+This file forces Vercel to recognize the new deployment.
+Created to ensure Vercel pulls latest commit with all fixes.
+Timestamp: 2025-08-08
