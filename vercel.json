@@ -16,6 +16,10 @@
       "dest": "/favicon.ico"
     },
     {
+      "src": "/(.*\\.(mp3|wav|ogg|m4a))",
+      "dest": "/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }
