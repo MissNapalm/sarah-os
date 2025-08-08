@@ -15,8 +15,8 @@ const Window = ({ title, content, onClose }) => {
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (dragging) {
-        const newX = Math.max(0, Math.min(window.innerWidth - size.width, e.clientX - dragOffset.current.x));
-        const newY = Math.max(0, Math.min(window.innerHeight - size.height - 5, e.clientY - dragOffset.current.y));
+        const newX = Math.max(-size.width + 50, Math.min(window.innerWidth - 50, e.clientX - dragOffset.current.x));
+        const newY = Math.max(-size.height + 50, e.clientY - dragOffset.current.y);
         setPosition({
           x: newX,
           y: newY

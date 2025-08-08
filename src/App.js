@@ -48,6 +48,17 @@ const App = () => {
     }
   });
 
+  const whooshSound = new Howl({
+    src: ["/whoosh.wav"],
+    volume: 0.3,
+    format: ['wav'],
+    html5: false,
+    preload: true,
+    onloaderror: (id, error) => {
+      console.log("Whoosh sound load error:", error);
+    }
+  });
+
   // const music = new Howl({
   //   src: ["/music.mp3"],
   //   volume: 0.65, // 65% volume
@@ -154,14 +165,14 @@ const App = () => {
     }
 
     // Start fade-in sequence
-    setTimeout(() => setFadeInStage(1), 100); // Fade in SarahOS text after 100ms
-    setTimeout(() => setFadeInStage(2), 1700); // Fade in desktop icons after 1700ms
-    setTimeout(() => setFadeInStage(3), 2230); // Fade in dock after 2230ms (0.53 seconds after icons)
+    setTimeout(() => setFadeInStage(1), 500); // Fade in SarahOS text after 500ms
+    setTimeout(() => setFadeInStage(2), 2500); // Fade in desktop icons after 2500ms (2 seconds after text)
+    setTimeout(() => setFadeInStage(3), 4500); // Fade in dock after 4500ms (2 seconds after icons)
 
     // Fade out the black screen and make the button disappear
     setTimeout(() => setBlackScreenOpacity(0), 800); // Start fading out the black screen
     setTimeout(() => setButtonVisible(false), 100); // Hide the button visually
-    setTimeout(() => setBooted(true), 3600); // Remove the black screen after dock animation completes
+    setTimeout(() => setBooted(true), 6000); // Remove the black screen after dock animation completes
   };
 
   return (
@@ -222,10 +233,7 @@ const App = () => {
             display: "inline-block", 
             marginLeft: "0.15em",
             fontWeight: "800",
-            background: "linear-gradient(135deg, #ffffff 0%, #e8e8e8 100%)",
-            WebkitBackgroundClip: "text",
-            WebkitTextFillColor: "transparent",
-            backgroundClip: "text"
+            color: "white"
           }}>OS</span>
         </h1>
         <p className="text-white text-center" style={{
@@ -263,6 +271,13 @@ const App = () => {
               };
               document.addEventListener("mousemove", onDrag);
               document.addEventListener("mouseup", onDragEnd);
+            }}
+            onMouseEnter={() => {
+              try {
+                whooshSound.play();
+              } catch (error) {
+                console.log("Whoosh sound play error:", error);
+              }
             }}
           >
             <DesktopIcon
