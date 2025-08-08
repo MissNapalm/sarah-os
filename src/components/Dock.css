@@ -1,0 +1,31 @@
+.dock {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 90px; /* Adjust the dock height */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.6); /* Semitransparent dock background - slightly more opaque for readability */
+    z-index: 1000;
+    transition: background-color 0.3s ease;
+  }
+  
+  .dock-icon {
+    font-size: 35px; /* 30% smaller initial size (50px * 0.7) */
+    margin: 0 15px;
+    color: white; /* Icon color */
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth animation */
+    background: none; /* Ensures no background */
+    border: none; /* Removes any borders */
+    padding: 0; /* Resets padding */
+    outline: none; /* Removes focus outline */
+  }
+  
+  .dock-icon:hover {
+    transform: scale(1.3); /* Enlarges by 30% */
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.8); /* Glow effect */
+  }
+  
