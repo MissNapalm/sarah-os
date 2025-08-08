@@ -14,18 +14,34 @@
     z-index: 1000;
   }
   
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: scale(0.8);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
+@keyframes windowAppear {
+  0% {
+    opacity: 0;
+    transform: scale(0.85) translateY(-20px);
+    filter: blur(8px);
   }
-  
-  @keyframes contentSlideIn {
+  60% {
+    opacity: 0.8;
+    transform: scale(1.02) translateY(-2px);
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}  @keyframes contentSlideIn {
     from {
       opacity: 0;
       transform: translateY(20px);
@@ -161,8 +177,33 @@
     flex: 1;
     padding: 20px;
     overflow-y: auto;
-    font-size: 14px;
-    color: #333;
+  }
+
+  /* Custom scrollbar for window content */
+  .window-content::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .window-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    margin: 8px;
+  }
+
+  .window-content::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.2) 100%);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+  }
+
+  .window-content::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.4) 0%, rgba(255, 255, 255, 0.3) 100%);
+  }
+
+  /* Firefox scrollbar */
+  .window-content {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.05);
   }
   
   .window-resizable {
