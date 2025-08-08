@@ -32,7 +32,8 @@ const App = () => {
     src: ["/bootup.mp3"],
     volume: 0.5,
     format: ['mp3'],
-    html5: true,
+    html5: false, // Use Web Audio API instead of HTML5 for better compatibility
+    preload: true,
     onload: () => {
       console.log("Boot sound loaded successfully");
     },
@@ -143,29 +144,24 @@ const App = () => {
 
   const handleBoot = () => {
     console.log("Boot button clicked - attempting to play sound");
-    // Play boot sound after 1 second delay
-    setTimeout(() => {
-      try {
-        console.log("Playing boot sound...");
-        bootSound.play();
-      } catch (error) {
-        console.log("Boot sound error:", error);
-      }
-    }, 1000);
+    
+    // Immediately try to play the sound when user clicks (user interaction)
+    try {
+      console.log("Playing boot sound immediately...");
+      bootSound.play();
+    } catch (error) {
+      console.log("Boot sound immediate play error:", error);
+    }
 
     // Start fade-in sequence
     setTimeout(() => setFadeInStage(1), 100); // Fade in SarahOS text after 100ms
     setTimeout(() => setFadeInStage(2), 1700); // Fade in desktop icons after 1700ms
-    setTimeout(() => setFadeInStage(3), 2800); // Fade in dock after 2800ms (1.1 seconds after icons)
+    setTimeout(() => setFadeInStage(3), 2230); // Fade in dock after 2230ms (0.53 seconds after icons)
 
     // Fade out the black screen and make the button disappear
     setTimeout(() => setBlackScreenOpacity(0), 800); // Start fading out the black screen
     setTimeout(() => setButtonVisible(false), 100); // Hide the button visually
     setTimeout(() => setBooted(true), 3600); // Remove the black screen after dock animation completes
-
-    // Play background music 1.8 seconds after the visual elements fade in
-    setTimeout(() => {
-    }, 4100); // 2300ms + 1800ms delay
   };
 
   return (
@@ -213,11 +209,34 @@ const App = () => {
           zIndex: 40,
         }}
       >
-        <h1 className="text-white text-6xl font-bold text-center">
+        <h1 className="text-white font-bold text-center" style={{
+          fontSize: "4rem", // More controlled size
+          fontFamily: "'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          fontWeight: "700",
+          letterSpacing: "-0.02em", // Tighter letter spacing for premium look
+          textShadow: "0 4px 8px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2)",
+        }}>
           <span>Sarah</span>
-          <span style={{ fontSize: "130%", display: "inline-block", marginLeft: "8px" }}>OS</span>
+          <span style={{ 
+            fontSize: "1.3em", 
+            display: "inline-block", 
+            marginLeft: "0.15em",
+            fontWeight: "800",
+            background: "linear-gradient(135deg, #ffffff 0%, #e8e8e8 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text"
+          }}>OS</span>
         </h1>
-        <p className="text-white text-base text-center">Frontend Design and Cybersecurity</p>
+        <p className="text-white text-center" style={{
+          fontSize: "1.1rem",
+          fontFamily: "'Inter', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          fontWeight: "400",
+          letterSpacing: "0.02em",
+          opacity: "0.9",
+          textShadow: "0 2px 4px rgba(0, 0, 0, 0.4)",
+          marginTop: "0.5rem"
+        }}>Frontend Design and Cybersecurity</p>
       </div>
 
       {/* Desktop Icons */}
