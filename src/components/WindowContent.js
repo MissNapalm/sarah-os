@@ -54,14 +54,14 @@ export const AboutMeContent = () => (
           marginBottom: '12px',
           fontWeight: '400',
         }}>
-          Frontend Developer & Security Specialist
+          Full Stack Web Developer & Offensive Security Researcher
         </h2>
         <div style={{
           display: 'flex',
           gap: '6px',
           flexWrap: 'wrap'
         }}>
-          {['Frontend Development', 'Cybersecurity', 'React.js', 'UI/UX Design'].map(tag => (
+          {['Full Stack Development', 'Offensive Security', 'React.js', 'Penetration Testing'].map(tag => (
             <span key={tag} style={{
               padding: '3px 8px',
               borderRadius: '3px',
@@ -96,15 +96,14 @@ export const AboutMeContent = () => (
         Professional Summary
       </h3>
       <p style={{ marginBottom: '10px', color: '#cccccc', fontSize: '13px' }}>
-        Senior Frontend Developer and Cybersecurity Specialist with 5+ years of experience designing and implementing 
-        secure, scalable web applications. Expert in React.js ecosystem, Node.js backend development, and comprehensive 
-        security assessment methodologies. Proven track record of delivering high-performance applications while maintaining 
-        strict security compliance.
+        Security professional and web developer with 8 years of combined experience in security consulting, 
+        penetration testing, and modern web development. I specialize in building fast, beautiful, and secure 
+        web applications using React, Next.js, TypeScript, and Tailwind CSS.
       </p>
       <p style={{ color: '#cccccc', fontSize: '13px' }}>
-        Specialized in bridging the gap between user experience and application security, with extensive experience 
-        in penetration testing, digital forensics, and security engineering. Committed to mentoring junior developers 
-        and contributing to open-source security initiatives.
+        I bring a unique perspective to web development shaped by years of hands-on offensive security research, 
+        including real-world threat analysis, red team simulations, and forensic investigations. My background 
+        in ethical hacking allows me to design and build applications with security baked in from the start.
       </p>
     </div>
 
@@ -129,104 +128,55 @@ export const AboutMeContent = () => (
       <div style={{ marginBottom: '16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
           <h4 style={{ fontSize: '14px', color: '#ffffff', fontWeight: '600', margin: '0' }}>
-            Senior Security Developer
+            Freelance Application Developer
           </h4>
-          <span style={{ fontSize: '11px', color: '#0e639c', fontWeight: '500' }}>2022 - Present</span>
+          <span style={{ fontSize: '11px', color: '#0e639c', fontWeight: '500' }}>2023 - Present</span>
         </div>
         <p style={{ fontSize: '12px', color: '#cccccc', margin: '0 0 8px 0', fontStyle: 'italic' }}>
-          CyberTech Solutions • Remote
+          Self-Employed • San Antonio, TX
         </p>
         <ul style={{ fontSize: '12px', color: '#cccccc', marginLeft: '16px', lineHeight: '1.4' }}>
-          <li>Led development of security-focused web applications serving 50,000+ users</li>
-          <li>Implemented automated vulnerability scanning reducing security incidents by 75%</li>
-          <li>Mentored team of 8 junior developers in secure coding practices</li>
+          <li>Built functional, production-quality full-stack web applications designed for performance, security, and responsive user experience</li>
+          <li>Developed apps using a modern tech stack including Python, Flask, Node.js, React, TypeScript, and Next.js</li>
+          <li>Engineered predictive algorithms with machine learning techniques to deliver highly accurate data analysis and pattern detection</li>
+          <li>Implemented robust application security layers including bcrypt password hashing, CORS control headers, and CSRF protection measures</li>
         </ul>
       </div>
 
       <div style={{ marginBottom: '16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
           <h4 style={{ fontSize: '14px', color: '#ffffff', fontWeight: '600', margin: '0' }}>
-            Frontend Developer & Security Analyst
+            Independent Security Researcher
           </h4>
-          <span style={{ fontSize: '11px', color: '#0e639c', fontWeight: '500' }}>2020 - 2022</span>
+          <span style={{ fontSize: '11px', color: '#0e639c', fontWeight: '500' }}>2019 - Present</span>
         </div>
         <p style={{ fontSize: '12px', color: '#cccccc', margin: '0 0 8px 0', fontStyle: 'italic' }}>
-          TechGuard Industries • Hybrid
+          Self-Employed • San Antonio, TX
         </p>
         <ul style={{ fontSize: '12px', color: '#cccccc', marginLeft: '16px', lineHeight: '1.4' }}>
-          <li>Developed React-based dashboard applications with advanced security features</li>
-          <li>Conducted penetration testing and security assessments for enterprise clients</li>
-          <li>Reduced application vulnerabilities by 60% through secure development practices</li>
+          <li>Conducted extensive ethical hacking and penetration testing projects across Windows, Linux, and Android systems</li>
+          <li>Gained root or SYSTEM-level access on dozens of hardened devices using privilege escalation, custom malware, and AV/EDR evasion techniques</li>
+          <li>Regularly analyzed and bypassed security mechanisms including Windows Defender, firewalls, and app hardening</li>
+          <li>Applied ethical guidelines to all research and responsibly disclosed personal findings within self-contained systems</li>
         </ul>
       </div>
 
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
           <h4 style={{ fontSize: '14px', color: '#ffffff', fontWeight: '600', margin: '0' }}>
-            Junior Developer & Security Researcher
+            IT Support Specialist & Security Consultant
           </h4>
-          <span style={{ fontSize: '11px', color: '#0e639c', fontWeight: '500' }}>2019 - 2020</span>
+          <span style={{ fontSize: '11px', color: '#0e639c', fontWeight: '500' }}>2014 - 2016</span>
         </div>
         <p style={{ fontSize: '12px', color: '#cccccc', margin: '0 0 8px 0', fontStyle: 'italic' }}>
-          SecureCode Labs • On-site
+          On-site Consulting • San Antonio, TX
         </p>
         <ul style={{ fontSize: '12px', color: '#cccccc', marginLeft: '16px', lineHeight: '1.4' }}>
-          <li>Built full-stack applications using Node.js, React, and PostgreSQL</li>
-          <li>Performed digital forensics and incident response for security breaches</li>
-          <li>Contributed to open-source security tools with 2,000+ GitHub stars</li>
+          <li>Provided comprehensive on-site tech support and security consulting services for small to medium businesses</li>
+          <li>Managed hardware and software installations, ensuring secure configurations and optimal performance</li>
+          <li>Executed server upgrades and UPS installations to improve system reliability and disaster preparedness</li>
+          <li>Implemented RSYNC backup solutions for automated data protection and recovery strategies</li>
         </ul>
-      </div>
-    </div>
-
-    <div style={{
-      background: '#252526',
-      padding: '20px',
-      borderRadius: '4px',
-      marginBottom: '16px',
-      border: '1px solid #3e3e42',
-    }}>
-      <h3 style={{ 
-        fontSize: '16px', 
-        fontWeight: '600', 
-        marginBottom: '12px', 
-        color: '#ffffff',
-        borderBottom: '1px solid #3e3e42',
-        paddingBottom: '6px'
-      }}>
-        Education & Certifications
-      </h3>
-      
-      <div style={{ marginBottom: '12px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-          <h4 style={{ fontSize: '14px', color: '#ffffff', fontWeight: '600', margin: '0' }}>
-            Bachelor of Science in Computer Science
-          </h4>
-          <span style={{ fontSize: '11px', color: '#0e639c', fontWeight: '500' }}>2019</span>
-        </div>
-        <p style={{ fontSize: '12px', color: '#cccccc', margin: '0', fontStyle: 'italic' }}>
-          University of Technology • Cybersecurity Concentration
-        </p>
-      </div>
-
-      <div style={{ fontSize: '12px', color: '#cccccc' }}>
-        <h4 style={{ fontSize: '13px', color: '#ffffff', fontWeight: '600', marginBottom: '6px' }}>
-          Professional Certifications:
-        </h4>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-          {['CEH (Certified Ethical Hacker)', 'OSCP (Offensive Security)', 'AWS Solutions Architect', 'React Developer Certificate'].map(cert => (
-            <span key={cert} style={{
-              padding: '3px 8px',
-              borderRadius: '3px',
-              background: '#0e639c',
-              fontSize: '10px',
-              color: '#ffffff',
-              border: '1px solid #1177bb',
-              fontWeight: '400',
-            }}>
-              {cert}
-            </span>
-          ))}
-        </div>
       </div>
     </div>
   </div>

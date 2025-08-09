@@ -87,10 +87,12 @@ const Window = ({ title, content, onClose }) => {
         animation: "windowAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
         userSelect: "none",
         border: "1px solid rgba(255, 255, 255, 0.08)",
-        isolation: "isolate"
+        isolation: "isolate",
+        position: "relative"
       }}
       onMouseDown={(e) => e.preventDefault()}
     >
+      {/* Window Header */}
       <div
         className="window-header"
         onMouseDown={handleMouseDown}
@@ -107,7 +109,9 @@ const Window = ({ title, content, onClose }) => {
           cursor: "grab",
           borderBottom: "1px solid rgba(255, 255, 255, 0.06)",
           height: "52px",
-          letterSpacing: "-0.01em"
+          letterSpacing: "-0.01em",
+          borderTopLeftRadius: "20px",
+          borderTopRightRadius: "20px"
         }}
       >
         <span>{title}</span>
@@ -162,6 +166,7 @@ const Window = ({ title, content, onClose }) => {
         </div>
       </div>
 
+      {/* Window Content with integrated resize corner */}
       <div
         className="window-content"
         style={{
@@ -172,67 +177,42 @@ const Window = ({ title, content, onClose }) => {
           color: "rgba(255, 255, 255, 0.92)",
           fontSize: "14px",
           fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-          background: "linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(0, 0, 0, 0.1) 100%)",
+          background: `
+            linear-gradient(135deg, transparent 0%, transparent calc(100% - 30px), rgba(255, 255, 255, 0.08) calc(100% - 25px), rgba(255, 255, 255, 0.04) 100%),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.02) 0%, rgba(0, 0, 0, 0.1) 100%)
+          `,
           position: "relative",
-          lineHeight: "1.6"
+          lineHeight: "1.6",
+          borderBottomLeftRadius: "20px",
+          borderBottomRightRadius: "20px"
         }}
       >
-        <div style={{ padding: "24px", height: "100%", boxSizing: "border-box" }}>
+        <div style={{ 
+          padding: "24px", 
+          height: "100%", 
+          boxSizing: "border-box",
+          paddingBottom: "40px" // Extra space for resize area
+        }}>
           {content}
         </div>
-      </div>
-
-      <div
-        className="resize-handle"
-        style={{
-          position: "absolute",
-          bottom: "12px",
-          right: "12px",
-          width: "90px",
-          height: "28px",
-          cursor: "se-resize",
-          zIndex: 1001,
-          background: "linear-gradient(135deg, rgba(99, 179, 237, 0.9), rgba(56, 119, 238, 0.95))",
-          borderRadius: "14px",
-          opacity: 0.8,
-          transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "11px",
-          color: "rgba(255, 255, 255, 0.95)",
-          fontWeight: "600",
-          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-          textShadow: "0 1px 2px rgba(0, 0, 0, 0.4)",
-          border: "1px solid rgba(255, 255, 255, 0.15)",
-          backdropFilter: "blur(8px)",
-          boxShadow: `
-            0 4px 12px rgba(99, 179, 237, 0.25),
-            0 2px 4px rgba(0, 0, 0, 0.2),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2)
-          `
-        }}
-        onMouseDown={handleResizeStart}
-        onMouseEnter={(e) => {
-          e.target.style.opacity = "1";
-          e.target.style.transform = "scale(1.08) translateY(-1px)";
-          e.target.style.boxShadow = `
-            0 6px 20px rgba(99, 179, 237, 0.35),
-            0 3px 8px rgba(0, 0, 0, 0.25),
-            inset 0 1px 0 rgba(255, 255, 255, 0.25)
-          `;
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.opacity = "0.8";
-          e.target.style.transform = "scale(1)";
-          e.target.style.boxShadow = `
-            0 4px 12px rgba(99, 179, 237, 0.25),
-            0 2px 4px rgba(0, 0, 0, 0.2),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2)
-          `;
-        }}
-      >
-        ⌟ resize
+        
+        {/* Integrated resize handle */}
+        <div
+          className="resize-handle"
+          style={{
+            position: "absolute",
+            bottom: "1px",
+            right: "1px",
+            width: "28px",
+            height: "28px",
+            cursor: "se-resize",
+            zIndex: 1001,
+            borderBottomRightRadius: "19px",
+            userSelect: "none"
+          }}
+          onMouseDown={handleResizeStart}
+        >
+        </div>
       </div>
     </div>
   );

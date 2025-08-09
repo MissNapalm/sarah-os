@@ -41,7 +41,7 @@ const Dock = ({ apps, onAppClick }) => {
     }
     // Only trigger for non-resume apps on single click
     if (app.name !== "My Resume") {
-      onAppClick(app);
+      onAppClick(app.name);
     }
   };
 
@@ -52,7 +52,7 @@ const Dock = ({ apps, onAppClick }) => {
       window.open('https://flowcv.com/resume/u2ckr5r2ktsk', '_blank');
     } else {
       // For other apps, trigger normal window opening
-      onAppClick(app);
+      onAppClick(app.name);
     }
   };
 

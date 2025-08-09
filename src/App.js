@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Howl } from "howler";
 import Dock from "./components/Dock";
 import Window from "./components/Window";
 import DesktopIcon from "./components/DesktopIcon";
 import HackerTerminal from "./components/HackerTerminal";
+import Calculator from "./components/Calculator";
+import Arkanoid from "./components/Arkanoid";
+import PipesScreensaver from "./components/PipesScreensaver";
 import {
   AboutMeContent,
   SkillsContent,
@@ -17,11 +20,17 @@ import "./App.css";
 const App = () => {
   const dockHeight = 90;
   const [windows, setWindows] = useState([]);
+  const [activeWindow, setActiveWindow] = useState("");
+  const [showHackerTerminal, setShowHackerTerminal] = useState(false);
+  const [showCalculator, setShowCalculator] = useState(false);
+  const [showArkanoid, setShowArkanoid] = useState(false);
+  const [showScreensaver, setShowScreensaver] = useState(false);
+  const [audio, setAudio] = useState(true); // Audio enabled by default
   const [icons, setIcons] = useState([
     { id: 1, name: "Hacker Typer Game", icon: "💻", content: "Documents Content", position: { x: 20, y: 130 } },
-    { id: 2, name: "My Resume", icon: "🌐", content: "Projects Content", position: { x: 20, y: 230 } },
-    { id: 3, name: "Downloads", icon: "⬇️", content: "Downloads Content", position: { x: 20, y: 330 } },
-    { id: 4, name: "Recycle Bin", icon: "🗑️", content: "I'm out of cute easter egg ideas...for now. Until then, enjoy this empty space XD", position: { x: 20, y: 430 } },
+    { id: 2, name: "Calculator", icon: "🧮", content: "Projects Content", position: { x: 20, y: 230 } },
+    { id: 3, name: "Arkanoid", icon: "🧱", content: "Arkanoid Content", position: { x: 20, y: 330 } },
+    { id: 4, name: "3D Pipes Screensaver", icon: "�", content: "Screensaver Content", position: { x: 20, y: 430 } },
   ]);
   const [booted, setBooted] = useState(false); // Controls the boot sequence - RESTORED
   const [fadeInStage, setFadeInStage] = useState(0); // Tracks which elements are fading in - START FROM BEGINNING
@@ -65,73 +74,79 @@ const App = () => {
   //   loop: true,
   // });
 
-  const openWindow = (app) => {
-    let content = app.content;
-    let width = 625;
-    let height = 600;
-
-    if (app.name === "About Me") {
-      content = <AboutMeContent />;
-    } else if (app.name === "Skills") {
-      content = <SkillsContent />;
-    } else if (app.name === "Software") {
-      content = <EthicalHacksContent />;
-    } else if (app.name === "Security") {
-      content = <NonprofitContent />;
-    } else if (app.name === "Settings") {
-      content = <SettingsContent />;
-    } else if (app.name === "Hacker Typer Game") {
-      // EASTER EGG: Hacker Terminal
-      content = (
-        <div style={{ textAlign: "center", padding: "20px" }}>
-          <h2>Type fast to hack! (This is really how it works btw)</h2>
-          <HackerTerminal />
-        </div>
-      );
-    } else if (app.name === "My Resume") {
-      // Open resume in new tab
-      window.open('https://flowcv.com/resume/u2ckr5r2ktsk', '_blank');
-      return; // Don't create a window, just open the link
-    } else if (app.name === "Downloads") {
-      // EASTER EGG: "The Game" joke with fake files
-      content = (
-        <div style={{ padding: "20px" }}>
-          <h2>Downloads</h2>
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
-            gap: "10px",
-            marginTop: "15px"
-          }}>
-            {["You.txt", "Have", "Just", "Lost.txt", "The.txt", "Game.txt"].map((file, index) => (
-              <div key={index} style={{
-                padding: "10px",
-                borderRadius: "8px",
-                background: "rgba(255, 255, 255, 0.1)",
-                textAlign: "center",
-                fontSize: "16px",
-                cursor: "pointer",
-                transition: "background 0.2s",
-                boxShadow: "0 4px 6px rgba(0, 0, 0, 0.2)"
-              }}
-              onClick={() => alert("You lost The Game.")}
-              >
-                📄 {file}
-              </div>
-            ))}
-          </div>
-        </div>
-      );
+  const openWindow = (itemName) => {
+    if (audio) {
+      const whooshSound = new Howl({
+        src: ["/whoosh.wav"],
+        volume: 0.9,
+      });
+      whooshSound.play();
     }
-    
-    setWindows((prev) => [
-      ...prev,
-      { id: Date.now(), title: app.name, content: content, width: width, height: height },
-    ]);
+
+    // Close any existing windows first
+    setActiveWindow("");
+    setWindows([]);
+    setShowHackerTerminal(false);
+    setShowCalculator(false);
+    setShowArkanoid(false);
+    setShowScreensaver(false);
+
+    if (itemName === "Terminal") {
+      setShowHackerTerminal(true);
+    } else if (itemName === "Calculator") {
+      setShowCalculator(true);
+    } else if (itemName === "Arkanoid") {
+      setShowArkanoid(true);
+    } else if (itemName === "3D Pipes Screensaver") {
+      setShowScreensaver(true);
+    } else {
+      // Create window for standard dock items
+      let content;
+      switch (itemName) {
+        case "About Me":
+          content = <AboutMeContent />;
+          break;
+        case "Skills":
+          content = <SkillsContent />;
+          break;
+        case "Software":
+          content = <EthicalHacksContent />;
+          break;
+        case "Security":
+          content = <NonprofitContent />;
+          break;
+        case "Resume":
+          content = <SettingsContent />;
+          break;
+        default:
+          content = <div>Content not found</div>;
+      }
+      
+      setWindows([{
+        id: Date.now(),
+        title: itemName,
+        content: content,
+        width: 520,
+        height: 480
+      }]);
+      setActiveWindow(itemName);
+    }
   };
 
   const closeWindow = (id) => {
     setWindows((prev) => prev.filter((win) => win.id !== id));
+  };
+
+  const closeCalculator = () => {
+    setShowCalculator(false);
+  };
+
+  const closeArkanoid = () => {
+    setShowArkanoid(false);
+  };
+
+  const closeScreensaver = () => {
+    setShowScreensaver(false);
   };
 
   const handleIconDrag = (id, e) => {
@@ -182,7 +197,11 @@ const App = () => {
         backgroundImage: `url(${wallpaperImage})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
+        backgroundRepeat: 'no-repeat',
+        userSelect: 'none',
+        WebkitUserSelect: 'none',
+        MozUserSelect: 'none',
+        msUserSelect: 'none'
       }}
     >
       {/* Boot Screen */}
@@ -270,6 +289,10 @@ const App = () => {
             style={{
               left: `${icon.position.x}px`,
               top: `${icon.position.y}px`,
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              MozUserSelect: 'none',
+              msUserSelect: 'none'
             }}
             onMouseDown={(e) => {
               const onDrag = (event) => handleIconDrag(icon.id, event);
@@ -279,6 +302,7 @@ const App = () => {
               };
               document.addEventListener("mousemove", onDrag);
               document.addEventListener("mouseup", onDragEnd);
+              e.preventDefault(); // Prevent text selection
             }}
             onMouseEnter={() => {
               try {
@@ -291,7 +315,7 @@ const App = () => {
             <DesktopIcon
               name={icon.name}
               icon={icon.icon}
-              onDoubleClick={() => openWindow(icon)}
+              onDoubleClick={() => openWindow(icon.name)}
             />
           </div>
         ))}
@@ -317,7 +341,7 @@ const App = () => {
             { name: "Skills", icon: "📂", content: "Skills Content" },
             { name: "Software", icon: "💻", content: "Software Content" },
             { name: "Security", icon: "🛡️", content: "Security Content" },
-            { name: "Settings", icon: "⚙️", content: "Settings Content" },
+            { name: "Resume", icon: "🌐", content: "Resume Content" },
           ]}
           onAppClick={openWindow}
         />
@@ -335,6 +359,15 @@ const App = () => {
             onClose={() => closeWindow(win.id)}
           />
         ))}
+
+      {/* Calculator */}
+      {showCalculator && <Calculator onClose={closeCalculator} />}
+
+      {/* Arkanoid Game */}
+      {showArkanoid && <Arkanoid onClose={closeArkanoid} />}
+
+      {/* 3D Pipes Screensaver */}
+      {showScreensaver && <PipesScreensaver onClose={closeScreensaver} />}
     </div>
   );
 };
