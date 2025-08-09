@@ -132,7 +132,7 @@ function Ultranoid({ onClose }) {
   const lastDragRafRef = useRef(0);
 
   // UI-only state (throttled)
-  const [ui, setUi] = useState({ score: 0, health: 3, started: false });
+  const [ui, setUi] = useState({ score: 0, health: 5, started: false });
 
   // Config - Optimized for performance (Slowed down 20%)
   const cfg = useMemo(() => ({
@@ -150,7 +150,7 @@ function Ultranoid({ onClose }) {
     enemyBulletW: 6, // Round bullets - width = diameter
     enemyBulletH: 6, // Round bullets - height = diameter
     enemyBulletSpeed: 2.9, // Slowed down 20% (was 3.6)
-    enemyFireMs: 800, // Shoot much more frequently (was 1200)
+    enemyFireMs: 500, // Shoot much more frequently (was 800, reduced by 300ms)
     brickRows: 3,
     brickCols: 8,
     brickW: 52,
@@ -171,6 +171,10 @@ function Ultranoid({ onClose }) {
   const emojiSizeRef = useRef(64);
   const bgPatternRef = useRef(null); // canvas pattern
   const bgOffRef = useRef({ x: 0, y: 0 });
+  const audioRef = useRef(null); // Background music
+  const laserSoundRef = useRef(null); // Player shooting sound
+  const raygunSoundRef = useRef(null); // Enemy shooting sound
+  const blipSoundRef = useRef(null); // Block hit sound
 
   const initBricks = useCallback(() => {
     const b = [];
@@ -190,7 +194,7 @@ function Ultranoid({ onClose }) {
     gameRef.current = {
       started: false,
       score: 0,
-      health: 3,
+      health: 5,
       frames: 0,
       enemySpawnTimer: 0,
       bgTime: 0,
@@ -208,10 +212,56 @@ function Ultranoid({ onClose }) {
       })),
       pIndex: 0,
     };
-    setUi({ score: 0, health: 3, started: false });
+    setUi({ score: 0, health: 5, started: false });
   }, [cfg.maxParticles, initBricks]);
 
   useEffect(() => { resetGame(); }, [resetGame]);
+
+  // Background music setup
+  useEffect(() => {
+    const audio = new Audio('/battle.mp3');
+    audio.loop = true;
+    audio.volume = 0.65; // 30% louder (was 0.5, now 0.65)
+    audioRef.current = audio;
+
+    // Setup sound effects
+    const laserSound = new Audio('/Lasers.wav');
+    laserSound.volume = 0.3; // Lower volume for SFX
+    laserSoundRef.current = laserSound;
+
+    const raygunSound = new Audio('/Raygun.wav');
+    raygunSound.volume = 0.3; // Lower volume for SFX
+    raygunSoundRef.current = raygunSound;
+
+    const blipSound = new Audio('/Bamage.wav');
+    blipSound.volume = 0.32; // 20% quieter (was 0.4, now 0.32)
+    blipSound.playbackRate = 1.3; // 30% faster
+    blipSoundRef.current = blipSound;
+
+    // Try to play music when component mounts
+    const playMusic = async () => {
+      try {
+        await audio.play();
+      } catch (error) {
+        // Auto-play might be blocked, will play when user interacts
+        console.log('Auto-play blocked, music will start on user interaction');
+      }
+    };
+
+    playMusic();
+
+    // Cleanup: stop music and clear sound refs when component unmounts
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current = null;
+      }
+      laserSoundRef.current = null;
+      raygunSoundRef.current = null;
+      blipSoundRef.current = null;
+    };
+  }, []);
 
   // Dragging via transform
   const onMouseDown = (e) => {
@@ -232,7 +282,9 @@ function Ultranoid({ onClose }) {
       if (!lastDragRafRef.current) {
         lastDragRafRef.current = requestAnimationFrame(() => {
           const { x, y } = desiredPosRef.current;
-          wrapRef.current.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`;
+          if (wrapRef.current) { // Add null check here too
+            wrapRef.current.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`;
+          }
           lastDragRafRef.current = 0;
         });
       }
@@ -260,29 +312,60 @@ function Ultranoid({ onClose }) {
     const ctx = canvas.getContext('2d');
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
-    // Build angry emoji sprite once - RED ANGRY FACE
+    // Load enemy image sprite
     const size = 64;
-    const off = document.createElement('canvas');
-    off.width = size;
-    off.height = size;
-    const octx = off.getContext('2d');
-    octx.textBaseline = 'middle';
-    octx.textAlign = 'center';
-    octx.font = `${size * 0.9}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
-    octx.fillText('�', size / 2, size / 2); // Changed to red angry face
-    emojiSpriteRef.current = off;
-    emojiSizeRef.current = size;
-
-    // Background tile pattern
-    const tile = document.createElement('canvas');
-    tile.width = 80;
-    tile.height = 80;
-    const tctx = tile.getContext('2d');
-    tctx.strokeStyle = 'rgba(0, 221, 255, 0.08)';
-    tctx.lineWidth = 1;
-    for (let x = 0; x <= 80; x += 40) { tctx.beginPath(); tctx.moveTo(x, 0); tctx.lineTo(x, 80); tctx.stroke(); }
-    for (let y = 0; y <= 80; y += 40) { tctx.beginPath(); tctx.moveTo(0, y); tctx.lineTo(80, y); tctx.stroke(); }
-    bgPatternRef.current = ctx.createPattern(tile, 'repeat');
+    const enemyImg = new Image();
+    enemyImg.src = '/enemy.png';
+    enemyImg.onload = () => {
+      const off = document.createElement('canvas');
+      off.width = size;
+      off.height = size;
+      const octx = off.getContext('2d');
+      octx.drawImage(enemyImg, 0, 0, size, size);
+      emojiSpriteRef.current = off;
+      emojiSizeRef.current = size;
+    };
+    
+    // If image fails to load, create a simple fallback graphic
+    enemyImg.onerror = () => {
+      const off = document.createElement('canvas');
+      off.width = size;
+      off.height = size;
+      const octx = off.getContext('2d');
+      
+      // Simple red circle with angry face as fallback
+      octx.fillStyle = '#FF4444';
+      octx.beginPath();
+      octx.arc(size/2, size/2, size/2 - 2, 0, Math.PI * 2);
+      octx.fill();
+      
+      // Simple angry eyes
+      octx.fillStyle = '#000000';
+      octx.fillRect(size/2 - 12, size/2 - 8, 6, 6);
+      octx.fillRect(size/2 + 6, size/2 - 8, 6, 6);
+      
+      // Angry mouth
+      octx.beginPath();
+      octx.arc(size/2, size/2 + 8, 8, 0, Math.PI);
+      octx.stroke();
+      
+      emojiSpriteRef.current = off;
+      emojiSizeRef.current = size;
+    };
+    
+    // Create starfield background
+    const starCount = 450; // Increased from 300 for even denser starfield
+    const stars = [];
+    for (let i = 0; i < starCount; i++) {
+      stars.push({
+        x: Math.random() * cfg.W,
+        y: Math.random() * cfg.H,
+        z: Math.random() * 1000,
+        brightness: 0.3 + Math.random() * 0.7,
+        size: 0.5 + Math.random() * 1.5
+      });
+    }
+    bgPatternRef.current = stars;
   }, [cfg.H, cfg.W]);
 
   // Helpers
@@ -342,17 +425,42 @@ function Ultranoid({ onClose }) {
     let lastUiPush = 0;
 
     const drawBackground = (g) => {
-      const pattern = bgPatternRef.current;
-      if (!pattern) return;
-      const o = bgOffRef.current;
-      // Slow drift to "animate" cheaply
-      o.x = (o.x + 0.2) % 80;
-      o.y = (o.y + 0.1) % 80;
-      ctx.save();
-      ctx.translate(-o.x, -o.y);
-      ctx.fillStyle = pattern;
-      ctx.fillRect(-80, -80, canvas.width + 160, canvas.height + 160);
-      ctx.restore();
+      const stars = bgPatternRef.current;
+      if (!stars) return;
+      
+      // Update star positions for upward flight effect
+      for (let i = 0; i < stars.length; i++) {
+        const star = stars[i];
+        star.z -= 2; // Slightly slower flight speed
+        
+        // Reset stars that have passed us
+        if (star.z <= 0) {
+          star.z = 1000;
+          star.x = Math.random() * cfg.W;
+          star.y = Math.random() * cfg.H;
+        }
+        
+        // Calculate screen position with reduced perspective effect
+        const scale = 100 / star.z; // Reduced from 200 for less dramatic expansion
+        const screenX = star.x + (star.x - cfg.W / 2) * scale * 0.05; // Reduced from 0.1
+        const screenY = star.y + (star.y - cfg.H / 2) * scale * 0.05; // Reduced from 0.1
+        
+        // Draw star with brightness and size based on distance
+        const alpha = star.brightness * (1 - star.z / 1000) * 0.6; // Slightly dimmer
+        const size = Math.min(star.size * scale * 0.3, 2.5); // Cap max size at 2.5px
+        
+        if (alpha > 0.05 && size > 0.2 && screenX > -10 && screenX < cfg.W + 10 && screenY > -10 && screenY < cfg.H + 10) {
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.fillStyle = '#ffffff';
+          ctx.shadowColor = '#ffffff';
+          ctx.shadowBlur = Math.min(size * 1.5, 4); // Cap shadow blur
+          ctx.beginPath();
+          ctx.arc(screenX, screenY, Math.max(0.5, size), 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
     };
 
     const drawBricks = (g) => {
@@ -553,6 +661,12 @@ function Ultranoid({ onClose }) {
             b.status = 0;
             g.score += 1;
             hit = true;
+            
+            // Play blip sound for block hit
+            if (blipSoundRef.current) {
+              blipSoundRef.current.currentTime = 0;
+              blipSoundRef.current.play().catch(console.error);
+            }
           }
         }
       }
@@ -662,6 +776,12 @@ function Ultranoid({ onClose }) {
               dy: bulletDy
             });
             
+            // Play raygun sound effect
+            if (raygunSoundRef.current) {
+              raygunSoundRef.current.currentTime = 0; // Reset to start
+              raygunSoundRef.current.play().catch(console.error);
+            }
+            
             // Add muzzle flash particles from saucer
             spawnParticles(g, x, y, '#FF8844', 4, 1.8, 'explosion');
           }
@@ -742,6 +862,13 @@ function Ultranoid({ onClose }) {
                 g.score += 1;
                 spawnParticles(g, br.x + cfg.brickW / 2, br.y + cfg.brickH / 2, col, 6, 2.5, 'explosion');
               }
+              
+              // Play blip sound for block hit
+              if (blipSoundRef.current) {
+                blipSoundRef.current.currentTime = 0;
+                blipSoundRef.current.play().catch(console.error);
+              }
+              
               continue bulletLoop;
             }
           }
@@ -803,10 +930,8 @@ function Ultranoid({ onClose }) {
       ctx.fillStyle = 'rgba(0, 20, 40, 1)';
       ctx.fillRect(0, 0, cfg.W, cfg.H);
 
-      // Skip background animation when there are many objects
-      if (g.enemies.length < 5 && g.particles.filter(p => p.active).length < 30) {
-        drawBackground(g);
-      }
+      // Always draw starfield background for space effect
+      drawBackground(g);
       
       // Core gameplay rendering only
       drawBricks(g);
@@ -865,6 +990,12 @@ function Ultranoid({ onClose }) {
   const onCanvasClick = () => {
     const g = gameRef.current;
     if (!g) return;
+    
+    // Start music on first click if not already playing
+    if (audioRef.current && audioRef.current.paused) {
+      audioRef.current.play().catch(console.error);
+    }
+    
     if (!g.started) {
       g.started = true;
       setUi(prev => ({ ...prev, started: true }));
@@ -872,6 +1003,12 @@ function Ultranoid({ onClose }) {
       const bulletX = g.paddleX + cfg.paddleW / 2;
       const bulletY = cfg.H - cfg.paddleH - 20;
       g.playerBullets.push({ x: bulletX, y: bulletY });
+      
+      // Play laser sound effect
+      if (laserSoundRef.current) {
+        laserSoundRef.current.currentTime = 0; // Reset to start
+        laserSoundRef.current.play().catch(console.error);
+      }
     }
   };
 
