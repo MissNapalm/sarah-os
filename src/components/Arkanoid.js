@@ -132,7 +132,7 @@ function Ultranoid({ onClose }) {
   const lastDragRafRef = useRef(0);
 
   // UI-only state (throttled)
-  const [ui, setUi] = useState({ score: 0, health: 5, started: false });
+  const [ui, setUi] = useState({ score: 0, health: 5, started: false, level: 1 });
 
   // Config - Optimized for performance (Slowed down 20%)
   const cfg = useMemo(() => ({
@@ -212,7 +212,7 @@ function Ultranoid({ onClose }) {
       })),
       pIndex: 0,
     };
-    setUi({ score: 0, health: 5, started: false });
+    setUi({ score: 0, health: 5, started: false, level: 1 });
   }, [cfg.maxParticles, initBricks]);
 
   useEffect(() => { resetGame(); }, [resetGame]);
@@ -476,22 +476,42 @@ function Ultranoid({ onClose }) {
             ratio === 1 ? '#0095DD' :
             ratio === 0.75 ? '#00DD95' :
             ratio === 0.5 ? '#DDDD00' : '#DD4400';
+          
+          // Draw rounded brick with subtle glow
+          ctx.save();
           ctx.fillStyle = color;
-          ctx.fillRect(b.x, b.y, cfg.brickW, cfg.brickH);
+          ctx.shadowColor = color;
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.roundRect(b.x, b.y, cfg.brickW, cfg.brickH, 6);
+          ctx.fill();
+          ctx.restore();
         }
       }
     };
 
     const drawPaddle = (g) => {
+      // Draw rounded paddle with subtle glow
+      ctx.save();
       ctx.fillStyle = '#0095DD';
-      ctx.fillRect(g.paddleX, cfg.H - cfg.paddleH - 10, cfg.paddleW, cfg.paddleH);
+      ctx.shadowColor = '#0095DD';
+      ctx.shadowBlur = 10;
+      ctx.beginPath();
+      ctx.roundRect(g.paddleX, cfg.H - cfg.paddleH - 10, cfg.paddleW, cfg.paddleH, 8);
+      ctx.fill();
+      ctx.restore();
     };
 
     const drawBall = (g) => {
+      // Draw ball with bright glow
+      ctx.save();
+      ctx.fillStyle = '#00DDFF';
+      ctx.shadowColor = '#00DDFF';
+      ctx.shadowBlur = 15;
       ctx.beginPath();
       ctx.arc(g.ball.x, g.ball.y, cfg.ballR, 0, Math.PI * 2);
-      ctx.fillStyle = '#00DDFF';
       ctx.fill();
+      ctx.restore();
     };
 
     const drawPlayerBullets = (g) => {
@@ -635,6 +655,8 @@ function Ultranoid({ onClose }) {
       ctx.fillText('Score: ' + g.score, 8, 20);
       ctx.fillStyle = '#FF88AA';
       ctx.fillText('Health: ' + g.health, cfg.W - 110, 20);
+      ctx.fillStyle = '#FFFF00';
+      ctx.fillText('Round: ' + g.level, cfg.W/2 - 30, 20);
       if (!g.started) {
         ctx.font = '20px Arial';
         ctx.fillStyle = '#FFFFFF';
@@ -922,12 +944,63 @@ function Ultranoid({ onClose }) {
       }
     };
 
+    const checkLevelComplete = (g) => {
+      // Check if all bricks are destroyed
+      let bricksRemaining = 0;
+      for (let c = 0; c < cfg.brickCols; c++) {
+        for (let r = 0; r < cfg.brickRows; r++) {
+          if (g.bricks[c][r].status === 1) {
+            bricksRemaining++;
+          }
+        }
+      }
+      
+      if (bricksRemaining === 0) {
+        // Level complete!
+        g.level += 1;
+        g.score += 50; // Bonus points for completing level
+        
+        // Create celebration particles
+        spawnParticles(g, cfg.W/2, cfg.H/2, '#00FF00', 20, 4, 'explosion');
+        spawnParticles(g, cfg.W/4, cfg.H/3, '#FFFF00', 15, 3, 'explosion');
+        spawnParticles(g, 3*cfg.W/4, cfg.H/3, '#FF00FF', 15, 3, 'explosion');
+        
+        // Generate new bricks for next level
+        const newBricks = initBricks();
+        // Make bricks slightly harder each level (more health)
+        const extraHealth = Math.min(3, Math.floor((g.level - 1) / 2));
+        for (let c = 0; c < cfg.brickCols; c++) {
+          for (let r = 0; r < cfg.brickRows; r++) {
+            newBricks[c][r].health = 4 + extraHealth;
+          }
+        }
+        g.bricks = newBricks;
+        
+        // Clear enemies and bullets for fresh start
+        g.enemies = [];
+        g.enemyBullets = [];
+        g.playerBullets = [];
+        
+        // Reset ball position but keep it moving
+        g.ball.x = 240;
+        g.ball.y = 240;
+        g.ball.dx = cfg.ballSpeed;
+        g.ball.dy = -cfg.ballSpeed;
+        
+        // Play blip sound for level completion
+        if (blipSoundRef.current) {
+          blipSoundRef.current.currentTime = 0;
+          blipSoundRef.current.play().catch(console.error);
+        }
+      }
+    };
+
     const loop = () => {
       const g = gameRef.current;
       if (!g) return;
 
-      // Clear with simple fillRect (faster than clearRect)
-      ctx.fillStyle = 'rgba(0, 20, 40, 1)';
+      // Clear with darker blue background
+      ctx.fillStyle = 'rgba(0, 10, 25, 1)'; // Much darker blue
       ctx.fillRect(0, 0, cfg.W, cfg.H);
 
       // Always draw starfield background for space effect
@@ -955,14 +1028,17 @@ function Ultranoid({ onClose }) {
       updateEnemyBullets(g);
       updatePlayerBullets(g);
       updateParticles(g);
+      
+      // Check for level completion
+      checkLevelComplete(g);
 
       // Reduce UI update frequency even more
       const now = performance.now();
       if (now - lastUiPush > 150) {
         lastUiPush = now;
         setUi(prev => {
-          if (prev.score !== g.score || prev.health !== g.health || prev.started !== g.started) {
-            return { score: g.score, health: g.health, started: g.started };
+          if (prev.score !== g.score || prev.health !== g.health || prev.started !== g.started || prev.level !== g.level) {
+            return { score: g.score, health: g.health, started: g.started, level: g.level };
           }
           return prev;
         });
@@ -1084,7 +1160,7 @@ function Ultranoid({ onClose }) {
               Ultranoid
             </h3>
             <p style={{ margin: 0, color: 'rgba(255, 255, 255, 0.8)', fontSize: '12px' }}>
-              Score: {ui.score} &nbsp;•&nbsp; Health: {ui.health}
+              Score: {ui.score} &nbsp;•&nbsp; Health: {ui.health} &nbsp;•&nbsp; Round: {ui.level}
             </p>
           </div>
         </div>
