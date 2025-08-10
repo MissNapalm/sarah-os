@@ -1,116 +1,13 @@
 import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 
 /**
- * Ultranoid — fast version with angry-emoji enemies
- * - Single rAF    // Build flying saucer sprite once
-    const si    // Build flying saucer sprite once
-    const size = 64;
-    const off = document.createElement('canvas');
-    off.width = size;
-    off.height = size;
-    const octx = off.getContext('2d');
-    
-    // Draw flying saucer
-    const centerX = size / 2;
-    const centerY = size / 2;
-    const saucerWidth = size * 0.8;
-    const saucerHeight = size * 0.35;
-    
-    // Main saucer body (ellipse)
-    octx.save();
-    octx.fillStyle = '#666666';
-    octx.shadowColor = '#333333';
-    octx.shadowBlur = 4;
-    octx.beginPath();
-    octx.ellipse(centerX, centerY, saucerWidth/2, saucerHeight/2, 0, 0, Math.PI * 2);
-    octx.fill();
-    octx.restore();
-    
-    // Top dome
-    octx.save();
-    octx.fillStyle = '#888888';
-    octx.shadowColor = '#444444';
-    octx.shadowBlur = 2;
-    octx.beginPath();
-    octx.ellipse(centerX, centerY - saucerHeight/4, saucerWidth/3, saucerHeight/3, 0, 0, Math.PI * 2);
-    octx.fill();
-    octx.restore();
-    
-    // Bottom detail ring
-    octx.strokeStyle = '#444444';
-    octx.lineWidth = 2;
-    octx.beginPath();
-    octx.ellipse(centerX, centerY + saucerHeight/6, saucerWidth/2 - 2, saucerHeight/3, 0, 0, Math.PI * 2);
-    octx.stroke();
-    
-    // Small lights around the edge
-    octx.fillStyle = '#FF4444';
-    for (let i = 0; i < 6; i++) {
-      const angle = (i / 6) * Math.PI * 2;
-      const lightX = centerX + Math.cos(angle) * (saucerWidth/2 - 4);
-      const lightY = centerY + Math.sin(angle) * (saucerHeight/2 - 2);
-      octx.beginPath();
-      octx.arc(lightX, lightY, 2, 0, Math.PI * 2);
-      octx.fill();
-    }
-    
-    emojiSpriteRef.current = off;
-    emojiSizeRef.current = size;  const off = document.createElement('canvas');
-    off.width = size;
-    off.height = size;
-    const octx = off.getContext('2d');
-    
-    // Draw flying saucer
-    const centerX = size / 2;
-    const centerY = size / 2;
-    const saucerWidth = size * 0.8;
-    const saucerHeight = size * 0.35;
-    
-    // Main saucer body (ellipse)
-    octx.save();
-    octx.fillStyle = '#666666';
-    octx.shadowColor = '#333333';
-    octx.shadowBlur = 4;
-    octx.beginPath();
-    octx.ellipse(centerX, centerY, saucerWidth/2, saucerHeight/2, 0, 0, Math.PI * 2);
-    octx.fill();
-    octx.restore();
-    
-    // Top dome
-    octx.save();
-    octx.fillStyle = '#888888';
-    octx.shadowColor = '#444444';
-    octx.shadowBlur = 2;
-    octx.beginPath();
-    octx.ellipse(centerX, centerY - saucerHeight/4, saucerWidth/3, saucerHeight/3, 0, 0, Math.PI * 2);
-    octx.fill();
-    octx.restore();
-    
-    // Bottom detail ring
-    octx.strokeStyle = '#444444';
-    octx.lineWidth = 2;
-    octx.beginPath();
-    octx.ellipse(centerX, centerY + saucerHeight/6, saucerWidth/2 - 2, saucerHeight/3, 0, 0, Math.PI * 2);
-    octx.stroke();
-    
-    // Small lights around the edge
-    octx.fillStyle = '#FF4444';
-    for (let i = 0; i < 6; i++) {
-      const angle = (i / 6) * Math.PI * 2;
-      const lightX = centerX + Math.cos(angle) * (saucerWidth/2 - 4);
-      const lightY = centerY + Math.sin(angle) * (saucerHeight/2 - 2);
-      octx.beginPath();
-      octx.arc(lightX, lightY, 2, 0, Math.PI * 2);
-      octx.fill();
-    }
-    
-    emojiSpriteRef.current = off;
-    emojiSizeRef.current = size; not setState per frame)
- * - Enemies: 😠 sprite cached on offscreen canvas
- * - Enemies fire every 1.3s; 2 hits to kill (flash + particles)
- * - Subtle particle system with pooling
- * - Background is a cached pattern (cheap "scroll" animation)
- * - Drag window via CSS transform to avoid layout thrash
+ * Ultranoid — Enhanced space shooter with flying saucers
+ * - Ball bounces off enemies and destroys them instantly
+ * - Level progression system with increasing difficulty
+ * - Complete audio system with background music and sound effects
+ * - Glowing visual effects and starfield background
+ * - Pause/resume functionality
+ * - NEW: Mega Man–style charge shot (hold LMB 3s → big, double-damage shot)
  */
 
 const DPR = typeof window !== 'undefined'
@@ -132,25 +29,40 @@ function Ultranoid({ onClose }) {
   const lastDragRafRef = useRef(0);
 
   // UI-only state (throttled)
-  const [ui, setUi] = useState({ score: 0, health: 5, started: false, level: 1 });
+  const [ui, setUi] = useState({ score: 0, health: 5, started: false, level: 1, paused: false });
 
-  // Config - Optimized for performance (Slowed down 20%)
+  // Config (tuned)
   const cfg = useMemo(() => ({
     W: 480,
     H: 340,
     paddleW: 80,
     paddleH: 10,
     ballR: 8,
+
+    // Player bullets
     playerBulletW: 3,
     playerBulletH: 10,
-    playerBulletSpeed: 4, // Slowed down 20% (was 5)
-    enemySize: 31, // 30% smaller than 44 (was 44)
-    enemySpawnFrames: 120, // 2 seconds at 60fps (was 220)
-    enemyBaseSpeed: 0.8, // Much slower downward movement (was 1.5)
-    enemyBulletW: 6, // Round bullets - width = diameter
-    enemyBulletH: 6, // Round bullets - height = diameter
-    enemyBulletSpeed: 2.9, // Slowed down 20% (was 3.6)
-    enemyFireMs: 500, // Shoot much more frequently (was 800, reduced by 300ms)
+    playerBulletSpeed: 3,
+
+    // BIG charge shot (auto-fires after 3s of hold)
+    chargeTimeMs: 3000,
+    bigBulletW: 8,
+    bigBulletH: 22,
+    bigBulletSpeed: 3.2,
+    bigBulletDamage: 2,    // <- double damage
+    bigBulletColor: '#80FFEA',
+
+    // Enemies
+    enemySize: 31,
+    enemySpawnFrames: 120,
+    enemyBaseSpeed: 0.6,
+    enemyBulletW: 6,
+    enemyBulletH: 6,
+    enemyBulletSpeed: 2.2,
+    enemyFireMs: 500,
+    maxEnemies: 6,
+
+    // Bricks
     brickRows: 3,
     brickCols: 8,
     brickW: 52,
@@ -158,23 +70,27 @@ function Ultranoid({ onClose }) {
     brickPad: 3,
     brickTop: 30,
     brickLeft: 25,
-    maxParticles: 200, // Increased for cool effects
-    maxEnemies: 6, // Reduced since enemies are bigger
-    ballSpeed: 2.4, // Slowed down 20% (was 3)
+
+    // Particles
+    maxParticles: 200,
+
+    // Ball
+    ballSpeed: 1.8,
   }), []);
 
   // Game state (mutable)
   const gameRef = useRef(null);
 
-  // Cached drawing assets
-  const emojiSpriteRef = useRef(null); // offscreen canvas with 😠
+  // Assets
+  const emojiSpriteRef = useRef(null);
   const emojiSizeRef = useRef(64);
-  const bgPatternRef = useRef(null); // canvas pattern
+  const bgPatternRef = useRef(null);
   const bgOffRef = useRef({ x: 0, y: 0 });
-  const audioRef = useRef(null); // Background music
-  const laserSoundRef = useRef(null); // Player shooting sound
-  const raygunSoundRef = useRef(null); // Enemy shooting sound
-  const blipSoundRef = useRef(null); // Block hit sound
+  const audioRef = useRef(null);
+  const laserSoundRef = useRef(null);
+  const raygunSoundRef = useRef(null);
+  const blipSoundRef = useRef(null);
+  const chargeHumRef = useRef(null); // optional subtle charge hum
 
   const initBricks = useCallback(() => {
     const b = [];
@@ -193,78 +109,79 @@ function Ultranoid({ onClose }) {
     const bricks = initBricks();
     gameRef.current = {
       started: false,
+      paused: false,
       score: 0,
       health: 5,
+      level: 1,
       frames: 0,
       enemySpawnTimer: 0,
-      bgTime: 0,
 
       paddleX: 200,
-      ball: { x: 240, y: 240, dx: cfg.ballSpeed, dy: -cfg.ballSpeed }, // Use slowed speed
+      ball: { x: 240, y: 240, dx: cfg.ballSpeed, dy: -cfg.ballSpeed },
       bricks,
       enemies: [],
       playerBullets: [],
       enemyBullets: [],
 
-      // particle pool
+      // Charge shot state
+      isCharging: false,
+      chargeStart: 0,
+      chargeFired: false, // auto-fired at threshold
+
+      // Particles
       particles: new Array(cfg.maxParticles).fill(0).map(() => ({
         active: false, x:0, y:0, dx:0, dy:0, life:0, maxLife:0, size:0, color:'#fff'
       })),
       pIndex: 0,
     };
-    setUi({ score: 0, health: 5, started: false, level: 1 });
+    setUi({ score: 0, health: 5, started: false, level: 1, paused: false });
   }, [cfg.maxParticles, initBricks]);
 
   useEffect(() => { resetGame(); }, [resetGame]);
 
-  // Background music setup
+  // Audio
   useEffect(() => {
     const audio = new Audio('/battle.mp3');
     audio.loop = true;
-    audio.volume = 0.65; // 30% louder (was 0.5, now 0.65)
+    audio.volume = 0.65;
     audioRef.current = audio;
 
-    // Setup sound effects
     const laserSound = new Audio('/Lasers.wav');
-    laserSound.volume = 0.3; // Lower volume for SFX
+    laserSound.volume = 0.3;
     laserSoundRef.current = laserSound;
 
     const raygunSound = new Audio('/Raygun.wav');
-    raygunSound.volume = 0.3; // Lower volume for SFX
+    raygunSound.volume = 0.3;
     raygunSoundRef.current = raygunSound;
 
     const blipSound = new Audio('/Bamage.wav');
-    blipSound.volume = 0.32; // 20% quieter (was 0.4, now 0.32)
-    blipSound.playbackRate = 1.3; // 30% faster
+    blipSound.volume = 0.32;
+    blipSound.playbackRate = 1.3;
     blipSoundRef.current = blipSound;
 
-    // Try to play music when component mounts
-    const playMusic = async () => {
-      try {
-        await audio.play();
-      } catch (error) {
-        // Auto-play might be blocked, will play when user interacts
-        console.log('Auto-play blocked, music will start on user interaction');
-      }
-    };
+    // Optional subtle charge hum
+    const chargeHum = new Audio('/charge_hum.mp3');
+    chargeHum.loop = true;
+    chargeHum.volume = 0.18;
+    chargeHumRef.current = chargeHum;
 
-    playMusic();
+    (async () => {
+      try { await audio.play(); } catch {}
+    })();
 
-    // Cleanup: stop music and clear sound refs when component unmounts
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-        audioRef.current = null;
+      for (const ref of [audioRef, laserSoundRef, raygunSoundRef, blipSoundRef, chargeHumRef]) {
+        if (ref.current) {
+          try { ref.current.pause(); } catch {}
+          ref.current.currentTime = 0;
+          ref.current = null;
+        }
       }
-      laserSoundRef.current = null;
-      raygunSoundRef.current = null;
-      blipSoundRef.current = null;
     };
   }, []);
 
   // Dragging via transform
-  const onMouseDown = (e) => {
+  const onMouseDownShell = (e) => {
     if (!wrapRef.current) return;
     if (e.target === wrapRef.current || e.target.closest('.drag-handle')) {
       draggingRef.current = true;
@@ -282,9 +199,7 @@ function Ultranoid({ onClose }) {
       if (!lastDragRafRef.current) {
         lastDragRafRef.current = requestAnimationFrame(() => {
           const { x, y } = desiredPosRef.current;
-          if (wrapRef.current) { // Add null check here too
-            wrapRef.current.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`;
-          }
+          if (wrapRef.current) wrapRef.current.style.transform = `translate3d(${Math.round(x)}px, ${Math.round(y)}px, 0)`;
           lastDragRafRef.current = 0;
         });
       }
@@ -304,7 +219,6 @@ function Ultranoid({ onClose }) {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // DPR scale
     canvas.width = Math.floor(cfg.W * DPR);
     canvas.height = Math.floor(cfg.H * DPR);
     canvas.style.width = `${cfg.W}px`;
@@ -312,49 +226,32 @@ function Ultranoid({ onClose }) {
     const ctx = canvas.getContext('2d');
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
 
-    // Load enemy image sprite
+    // Enemy sprite (image or fallback)
     const size = 64;
     const enemyImg = new Image();
     enemyImg.src = '/enemy.png';
     enemyImg.onload = () => {
       const off = document.createElement('canvas');
-      off.width = size;
-      off.height = size;
+      off.width = size; off.height = size;
       const octx = off.getContext('2d');
       octx.drawImage(enemyImg, 0, 0, size, size);
       emojiSpriteRef.current = off;
       emojiSizeRef.current = size;
     };
-    
-    // If image fails to load, create a simple fallback graphic
     enemyImg.onerror = () => {
       const off = document.createElement('canvas');
-      off.width = size;
-      off.height = size;
+      off.width = size; off.height = size;
       const octx = off.getContext('2d');
-      
-      // Simple red circle with angry face as fallback
       octx.fillStyle = '#FF4444';
-      octx.beginPath();
-      octx.arc(size/2, size/2, size/2 - 2, 0, Math.PI * 2);
-      octx.fill();
-      
-      // Simple angry eyes
-      octx.fillStyle = '#000000';
-      octx.fillRect(size/2 - 12, size/2 - 8, 6, 6);
-      octx.fillRect(size/2 + 6, size/2 - 8, 6, 6);
-      
-      // Angry mouth
-      octx.beginPath();
-      octx.arc(size/2, size/2 + 8, 8, 0, Math.PI);
-      octx.stroke();
-      
+      octx.beginPath(); octx.arc(size/2, size/2, size/2 - 2, 0, Math.PI * 2); octx.fill();
+      octx.fillStyle = '#000'; octx.fillRect(size/2 - 12, size/2 - 8, 6, 6); octx.fillRect(size/2 + 6, size/2 - 8, 6, 6);
+      octx.beginPath(); octx.arc(size/2, size/2 + 8, 8, 0, Math.PI); octx.stroke();
       emojiSpriteRef.current = off;
       emojiSizeRef.current = size;
     };
-    
-    // Create starfield background
-    const starCount = 450; // Increased from 300 for even denser starfield
+
+    // Starfield
+    const starCount = 450;
     const stars = [];
     for (let i = 0; i < starCount; i++) {
       stars.push({
@@ -377,40 +274,32 @@ function Ultranoid({ onClose }) {
     return (dx*dx + dy*dy) <= cr*cr;
   };
 
-  // Particles (pooled) - Enhanced for cool effects
+  // Particles
   const spawnParticles = (g, x, y, color, count = 4, speed = 2, type = 'normal') => {
-    // Increase particle count for cooler effects
     const availableSlots = g.particles.filter(p => !p.active).length;
-    const actualCount = Math.min(count, Math.max(0, availableSlots - 30)); 
-    
+    const actualCount = Math.min(count, Math.max(0, availableSlots - 30));
     for (let i = 0; i < actualCount; i++) {
       const p = g.particles[g.pIndex];
-      if (p.active) continue;
-      
+      if (p.active) { g.pIndex = (g.pIndex + 1) % g.particles.length; i--; continue; }
       p.active = true;
       p.x = x; p.y = y;
-      
       if (type === 'explosion') {
-        // Explosion particles spread outward
-        const angle = (i / actualCount) * Math.PI * 2;
+        const angle = (i / Math.max(1, actualCount)) * Math.PI * 2;
         p.dx = Math.cos(angle) * speed * (1 + Math.random());
         p.dy = Math.sin(angle) * speed * (1 + Math.random());
         p.life = 15 + Math.random() * 10;
         p.size = 1.2 + Math.random() * 1.5;
       } else if (type === 'trail') {
-        // Trail particles with gentle drift
         p.dx = (Math.random() - 0.5) * speed * 0.5;
         p.dy = (Math.random() - 0.5) * speed * 0.5;
         p.life = 8 + Math.random() * 6;
         p.size = 0.6 + Math.random() * 0.8;
       } else {
-        // Normal particles
         p.dx = (Math.random() - 0.5) * speed * 1.8;
         p.dy = (Math.random() - 0.5) * speed * 1.8;
         p.life = 12 + Math.random() * 10;
         p.size = 0.8 + Math.random() * 1.2;
       }
-      
       p.maxLife = p.life;
       p.color = color;
       g.pIndex = (g.pIndex + 1) % g.particles.length;
@@ -427,34 +316,23 @@ function Ultranoid({ onClose }) {
     const drawBackground = (g) => {
       const stars = bgPatternRef.current;
       if (!stars) return;
-      
-      // Update star positions for upward flight effect
       for (let i = 0; i < stars.length; i++) {
         const star = stars[i];
-        star.z -= 2; // Slightly slower flight speed
-        
-        // Reset stars that have passed us
+        star.z -= 2;
         if (star.z <= 0) {
-          star.z = 1000;
-          star.x = Math.random() * cfg.W;
-          star.y = Math.random() * cfg.H;
+          star.z = 1000; star.x = Math.random() * cfg.W; star.y = Math.random() * cfg.H;
         }
-        
-        // Calculate screen position with reduced perspective effect
-        const scale = 100 / star.z; // Reduced from 200 for less dramatic expansion
-        const screenX = star.x + (star.x - cfg.W / 2) * scale * 0.05; // Reduced from 0.1
-        const screenY = star.y + (star.y - cfg.H / 2) * scale * 0.05; // Reduced from 0.1
-        
-        // Draw star with brightness and size based on distance
-        const alpha = star.brightness * (1 - star.z / 1000) * 0.6; // Slightly dimmer
-        const size = Math.min(star.size * scale * 0.3, 2.5); // Cap max size at 2.5px
-        
+        const scale = 100 / star.z;
+        const screenX = star.x + (star.x - cfg.W / 2) * scale * 0.05;
+        const screenY = star.y + (star.y - cfg.H / 2) * scale * 0.05;
+        const alpha = star.brightness * (1 - star.z / 1000) * 0.6;
+        const size = Math.min(star.size * scale * 0.3, 2.5);
         if (alpha > 0.05 && size > 0.2 && screenX > -10 && screenX < cfg.W + 10 && screenY > -10 && screenY < cfg.H + 10) {
           ctx.save();
           ctx.globalAlpha = alpha;
           ctx.fillStyle = '#ffffff';
           ctx.shadowColor = '#ffffff';
-          ctx.shadowBlur = Math.min(size * 1.5, 4); // Cap shadow blur
+          ctx.shadowBlur = Math.min(size * 1.5, 4);
           ctx.beginPath();
           ctx.arc(screenX, screenY, Math.max(0.5, size), 0, Math.PI * 2);
           ctx.fill();
@@ -464,46 +342,45 @@ function Ultranoid({ onClose }) {
     };
 
     const drawBricks = (g) => {
-      const {
-        brickCols, brickRows, brickW, brickH
-      } = cfg;
-      for (let c = 0; c < brickCols; c++) {
-        for (let r = 0; r < brickRows; r++) {
+      for (let c = 0; c < cfg.brickCols; c++) {
+        for (let r = 0; r < cfg.brickRows; r++) {
           const b = g.bricks[c][r];
           if (b.status !== 1) continue;
           const ratio = b.health / 4;
-          const color =
-            ratio === 1 ? '#0095DD' :
-            ratio === 0.75 ? '#00DD95' :
-            ratio === 0.5 ? '#DDDD00' : '#DD4400';
-          
-          // Draw rounded brick with subtle glow
+          const color = ratio === 1 ? '#0095DD' : ratio === 0.75 ? '#00DD95' : ratio === 0.5 ? '#DDDD00' : '#DD4400';
           ctx.save();
           ctx.fillStyle = color;
           ctx.shadowColor = color;
           ctx.shadowBlur = 8;
-          ctx.beginPath();
-          ctx.roundRect(b.x, b.y, cfg.brickW, cfg.brickH, 6);
-          ctx.fill();
+          if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(b.x, b.y, cfg.brickW, cfg.brickH, 6); ctx.fill(); }
+          else { ctx.fillRect(b.x, b.y, cfg.brickW, cfg.brickH); }
           ctx.restore();
         }
       }
     };
 
     const drawPaddle = (g) => {
-      // Draw rounded paddle with subtle glow
+      // charge indicator glow
+      if (g.isCharging) {
+        const t = Math.min(1, (performance.now() - g.chargeStart) / cfg.chargeTimeMs);
+        const glow = 8 + t * 18;
+        ctx.save();
+        ctx.shadowColor = '#80FFEA';
+        ctx.shadowBlur = glow;
+        ctx.fillStyle = 'rgba(128,255,234,0.3)';
+        if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(g.paddleX - 4, cfg.H - cfg.paddleH - 14, cfg.paddleW + 8, cfg.paddleH + 8, 10); ctx.fill(); }
+        ctx.restore();
+      }
       ctx.save();
       ctx.fillStyle = '#0095DD';
       ctx.shadowColor = '#0095DD';
       ctx.shadowBlur = 10;
-      ctx.beginPath();
-      ctx.roundRect(g.paddleX, cfg.H - cfg.paddleH - 10, cfg.paddleW, cfg.paddleH, 8);
-      ctx.fill();
+      if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(g.paddleX, cfg.H - cfg.paddleH - 10, cfg.paddleW, cfg.paddleH, 8); ctx.fill(); }
+      else { ctx.fillRect(g.paddleX, cfg.H - cfg.paddleH - 10, cfg.paddleW, cfg.paddleH); }
       ctx.restore();
     };
 
     const drawBall = (g) => {
-      // Draw ball with bright glow
       ctx.save();
       ctx.fillStyle = '#00DDFF';
       ctx.shadowColor = '#00DDFF';
@@ -517,57 +394,55 @@ function Ultranoid({ onClose }) {
     const drawPlayerBullets = (g) => {
       for (let i = 0; i < g.playerBullets.length; i++) {
         const b = g.playerBullets[i];
-        
-        // Draw subtle trail behind bullet
+        // trail
         ctx.save();
-        ctx.globalAlpha = 0.3;
-        ctx.strokeStyle = '#FFFFAA';
-        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.35;
+        ctx.strokeStyle = b.isBig ? cfg.bigBulletColor : '#FFFFAA';
+        ctx.lineWidth = b.isBig ? 3 : 2;
         ctx.lineCap = 'round';
-        
-        const trailLength = 6;
-        
+        const trail = b.isBig ? 10 : 6;
         ctx.beginPath();
         ctx.moveTo(b.x, b.y);
-        ctx.lineTo(b.x, b.y + trailLength);
+        ctx.lineTo(b.x, b.y + trail);
         ctx.stroke();
         ctx.restore();
-        
-        // Draw the bullet
-        ctx.fillStyle = '#FFFFAA';
-        ctx.fillRect(b.x - cfg.playerBulletW / 2, b.y, cfg.playerBulletW, cfg.playerBulletH);
+
+        // body
+        ctx.save();
+        if (b.isBig) {
+          ctx.fillStyle = cfg.bigBulletColor;
+          ctx.shadowColor = cfg.bigBulletColor;
+          ctx.shadowBlur = 10;
+          if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(b.x - cfg.bigBulletW/2, b.y, cfg.bigBulletW, cfg.bigBulletH, 4); ctx.fill(); }
+          else { ctx.fillRect(b.x - cfg.bigBulletW/2, b.y, cfg.bigBulletW, cfg.bigBulletH); }
+        } else {
+          ctx.fillStyle = '#FFFFAA';
+          ctx.fillRect(b.x - cfg.playerBulletW / 2, b.y, cfg.playerBulletW, cfg.playerBulletH);
+        }
+        ctx.restore();
       }
     };
 
     const drawEnemyBullets = (g) => {
       for (let i = 0; i < g.enemyBullets.length; i++) {
         const b = g.enemyBullets[i];
-        
-        // Draw subtle trail behind bullet
-        if (b.dx || b.dy) { // Only for directional bullets
-          ctx.save();
-          ctx.globalAlpha = 0.4;
-          ctx.strokeStyle = '#FF6644';
-          ctx.lineWidth = 2;
-          ctx.lineCap = 'round';
-          
-          // Calculate trail direction (opposite of movement)
-          const trailLength = 8;
-          const speed = Math.sqrt((b.dx || 0)**2 + (b.dy || cfg.enemyBulletSpeed)**2);
-          const normalizedDx = -(b.dx || 0) / speed;
-          const normalizedDy = -(b.dy || cfg.enemyBulletSpeed) / speed;
-          
-          ctx.beginPath();
-          ctx.moveTo(b.x, b.y);
-          ctx.lineTo(
-            b.x + normalizedDx * trailLength, 
-            b.y + normalizedDy * trailLength
-          );
-          ctx.stroke();
-          ctx.restore();
-        }
-        
-        // Draw the bullet as a glowing circle
+        // trail
+        ctx.save();
+        ctx.globalAlpha = 0.4;
+        ctx.strokeStyle = '#FF6644';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        const trailLength = 8;
+        const speed = Math.sqrt((b.dx || 0)**2 + (b.dy || cfg.enemyBulletSpeed)**2);
+        const ndx = speed ? -(b.dx || 0) / speed : 0;
+        const ndy = speed ? -(b.dy || cfg.enemyBulletSpeed) / speed : -1;
+        ctx.beginPath();
+        ctx.moveTo(b.x, b.y);
+        ctx.lineTo(b.x + ndx * trailLength, b.y + ndy * trailLength);
+        ctx.stroke();
+        ctx.restore();
+
+        // body
         ctx.save();
         ctx.fillStyle = '#FF6644';
         ctx.shadowColor = '#FF6644';
@@ -580,30 +455,21 @@ function Ultranoid({ onClose }) {
     };
 
     const drawParticles = (g) => {
-      // Enhanced particle rendering with subtle glow effects
       const particles = g.particles;
       let activeCount = 0;
-      
-      for (let i = 0; i < particles.length && activeCount < 80; i++) { // Increased limit for effects
+      for (let i = 0; i < particles.length && activeCount < 80; i++) {
         const p = particles[i];
         if (!p.active || p.life <= 0) continue;
-        
-        const alpha = (p.life / p.maxLife) * 0.8; // Higher alpha for visibility
+        const alpha = (p.life / p.maxLife) * 0.8;
         if (alpha <= 0.1) continue;
-        
         ctx.save();
         ctx.globalAlpha = alpha;
-        
-        // Add subtle glow effect
         ctx.shadowColor = p.color;
         ctx.shadowBlur = p.size * 2;
         ctx.fillStyle = p.color;
-        
-        // Use circles for smoother particles
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
-        
         ctx.restore();
         activeCount++;
       }
@@ -612,39 +478,26 @@ function Ultranoid({ onClose }) {
     const drawEnemies = (g) => {
       const spr = emojiSpriteRef.current;
       const base = emojiSizeRef.current || 64;
-      const drawSize = cfg.enemySize * 1.1; // Smaller multiplier for 30% smaller saucers
+      const drawSize = cfg.enemySize * 1.1;
       if (!spr) return;
-      
       for (let i = 0; i < g.enemies.length; i++) {
         const e = g.enemies[i];
-        
-        // Add subtle hover/floating effect
-        const time = Date.now() * 0.003;
-        const hoverOffset = Math.sin(time + e.ox) * 1.5; // Proportionally smaller hover
-        
-        // Enhanced flash effect for saucer damage
+        const hover = Math.sin(Date.now() * 0.003 + e.ox) * 1.5;
         if (e.flashTime > 0) {
           ctx.save();
           ctx.globalAlpha = e.flashTime / 15 * 0.8;
           ctx.fillStyle = '#ffffff';
           ctx.shadowColor = '#ffffff';
-          ctx.shadowBlur = 8; // Smaller glow for smaller saucers
+          ctx.shadowBlur = 8;
           ctx.beginPath();
-          ctx.ellipse(e.x, e.y + hoverOffset, drawSize/2, drawSize/3, 0, 0, Math.PI * 2);
+          ctx.ellipse(e.x, e.y + hover, drawSize/2, drawSize/3, 0, 0, Math.PI * 2);
           ctx.fill();
           ctx.restore();
         }
-        
-        // Draw the flying saucer with subtle glow
         ctx.save();
         ctx.shadowColor = '#666666';
         ctx.shadowBlur = 3;
-        ctx.drawImage(
-          spr,
-          0, 0, base, base,
-          e.x - drawSize / 2, (e.y + hoverOffset) - drawSize / 2,
-          drawSize, drawSize
-        );
+        ctx.drawImage(spr, 0, 0, base, base, e.x - drawSize / 2, (e.y + hover) - drawSize / 2, drawSize, drawSize);
         ctx.restore();
       }
     };
@@ -657,6 +510,20 @@ function Ultranoid({ onClose }) {
       ctx.fillText('Health: ' + g.health, cfg.W - 110, 20);
       ctx.fillStyle = '#FFFF00';
       ctx.fillText('Round: ' + g.level, cfg.W/2 - 30, 20);
+
+      // charge bar (bottom center) if charging
+      if (g.isCharging) {
+        const t = clamp((performance.now() - g.chargeStart) / cfg.chargeTimeMs, 0, 1);
+        const barW = 160, barH = 8;
+        const bx = (cfg.W - barW) / 2, by = cfg.H - 14;
+        ctx.save();
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        ctx.fillRect(bx, by, barW, barH);
+        ctx.fillStyle = cfg.bigBulletColor;
+        ctx.fillRect(bx, by, barW * t, barH);
+        ctx.restore();
+      }
+
       if (!g.started) {
         ctx.font = '20px Arial';
         ctx.fillStyle = '#FFFFFF';
@@ -675,41 +542,28 @@ function Ultranoid({ onClose }) {
           if (b.status !== 1) continue;
           if (ball.x + cfg.ballR > b.x && ball.x - cfg.ballR < b.x + cfg.brickW && ball.y + cfg.ballR > b.y && ball.y - cfg.ballR < b.y + cfg.brickH) {
             const ratio = b.health / 4;
-            const col =
-              ratio === 1 ? '#0095DD' :
-              ratio === 0.75 ? '#00DD95' :
-              ratio === 0.5 ? '#DDDD00' : '#DD4400';
+            const col = ratio === 1 ? '#0095DD' : ratio === 0.75 ? '#00DD95' : ratio === 0.5 ? '#DDDD00' : '#DD4400';
             spawnParticles(g, b.x + cfg.brickW / 2, b.y + cfg.brickH / 2, col, 4, 2);
             b.status = 0;
             g.score += 1;
             hit = true;
-            
-            // Play blip sound for block hit
-            if (blipSoundRef.current) {
-              blipSoundRef.current.currentTime = 0;
-              blipSoundRef.current.play().catch(console.error);
-            }
+            if (blipSoundRef.current) { blipSoundRef.current.currentTime = 0; blipSoundRef.current.play().catch(()=>{}); }
           }
         }
       }
       return hit;
     };
 
+    // ball update (includes enemy bounce/kill from your earlier version)
     const updateBall = (g) => {
-      if (!g.started) return;
+      if (!g.started || g.paused) return;
       let { x, y, dx, dy } = g.ball;
 
       const nx = x + dx;
       const ny = y + dy;
 
-      if (nx + cfg.ballR > cfg.W || nx - cfg.ballR < 0) {
-        dx = -dx;
-        spawnParticles(g, nx, ny, '#00DDFF', 2, 2);
-      }
-      if (ny - cfg.ballR < 0) {
-        dy = -dy;
-        spawnParticles(g, nx, ny, '#00DDFF', 2, 2);
-      }
+      if (nx + cfg.ballR > cfg.W || nx - cfg.ballR < 0) { dx = -dx; spawnParticles(g, nx, ny, '#00DDFF', 2, 2); }
+      if (ny - cfg.ballR < 0) { dy = -dy; spawnParticles(g, nx, ny, '#00DDFF', 2, 2); }
 
       const pTop = cfg.H - cfg.paddleH - 10;
       if (ny + cfg.ballR > pTop && ny - cfg.ballR < pTop + cfg.paddleH && nx > g.paddleX && nx < g.paddleX + cfg.paddleW) {
@@ -717,13 +571,34 @@ function Ultranoid({ onClose }) {
         const hitPos = (nx - g.paddleX) / cfg.paddleW;
         const angle = (hitPos - 0.5) * Math.PI / 3;
         const speed = Math.sqrt(dx * dx + dy * dy);
-        dx = speed * Math.sin(angle);
-        dy = -speed * Math.cos(angle);
+        dx = speed * Math.sin(angle); dy = -speed * Math.cos(angle);
         spawnParticles(g, nx, pTop, '#0095DD', 3, 2);
       }
 
       if (ny + cfg.ballR > cfg.H) { resetGame(); return; }
       if (collideBallBricks(g)) dy = -dy;
+
+      // enemies: kill + bounce
+      const rSum = cfg.ballR + cfg.enemySize / 2;
+      for (let i = 0; i < g.enemies.length; i++) {
+        const e = g.enemies[i];
+        const ex = nx - e.x, ey = ny - e.y;
+        const d2 = ex*ex + ey*ey;
+        if (d2 <= rSum * rSum) {
+          spawnParticles(g, e.x, e.y, '#FF0044', 10, 3, 'explosion');
+          g.score += 2;
+          g.enemies.splice(i, 1);
+          const dist = Math.max(0.0001, Math.sqrt(d2));
+          const nxn = ex / dist, nyn = ey / dist;
+          const vdotn = dx * nxn + dy * nyn;
+          dx = dx - 2 * vdotn * nxn;
+          dy = dy - 2 * vdotn * nyn;
+          const overlap = rSum - dist + 0.5;
+          x = nx + nxn * overlap;
+          y = ny + nyn * overlap;
+          break;
+        }
+      }
 
       g.ball.x = x + dx;
       g.ball.y = y + dy;
@@ -732,7 +607,7 @@ function Ultranoid({ onClose }) {
     };
 
     const spawnEnemies = (g) => {
-      if (!g.started || g.enemies.length >= cfg.maxEnemies) return; // Limit enemy count
+      if (!g.started || g.paused || g.enemies.length >= cfg.maxEnemies) return;
       if (g.enemySpawnTimer++ >= cfg.enemySpawnFrames) {
         const e = {
           x: Math.random() * (cfg.W - cfg.enemySize) + cfg.enemySize / 2,
@@ -744,7 +619,7 @@ function Ultranoid({ onClose }) {
           ox: Math.random() * Math.PI * 2,
           oy: Math.random() * Math.PI * 2,
           lastShot: performance.now() + Math.random() * 500,
-          horizontalIntensity: 2.2 + Math.random() * 0.8, // Simpler calculation
+          horizontalIntensity: 2.2 + Math.random() * 0.8,
         };
         g.enemies.push(e);
         g.enemySpawnTimer = 0;
@@ -752,64 +627,30 @@ function Ultranoid({ onClose }) {
     };
 
     const updateEnemies = (g) => {
-      if (g.enemies.length === 0) return; // Early exit
-      
+      if (g.paused || g.enemies.length === 0) return;
       const now = performance.now();
-      const timeCache = Date.now() * 0.002; // Even slower time
+      const t = Date.now() * 0.002;
       const out = [];
-      
       for (let i = 0; i < g.enemies.length; i++) {
         const e = g.enemies[i];
         if (e.flashTime > 0) e.flashTime--;
+        const hx = Math.sin(t + e.ox) * e.horizontalIntensity * 0.6;
+        const dx = hx * e.baseSpeed * 0.5;
+        const dy = e.baseSpeed;
+        let x = e.x + dx, y = e.y + dy;
+        const half = cfg.enemySize / 2;
+        if (x <= half || x >= cfg.W - half) { e.ox += Math.PI; x = clamp(x, half, cfg.W - half); }
 
-        // Slower horizontal movement
-        const nx = Math.sin(timeCache + e.ox) * e.horizontalIntensity * 0.6; // Reduced intensity
-        const dx = nx * e.baseSpeed * 0.5; // Much slower horizontal
-        const dy = e.baseSpeed; // Slower vertical movement
-
-        let x = e.x + dx;
-        let y = e.y + dy;
-        
-        // Simple boundary check
-        const halfSize = cfg.enemySize / 2;
-        if (x <= halfSize || x >= cfg.W - halfSize) { 
-          e.ox += Math.PI; 
-          x = Math.max(halfSize, Math.min(cfg.W - halfSize, x));
-        }
-
-        // Directional shooting toward player
         if (Math.random() < 0.008 && now - (e.lastShot || 0) >= cfg.enemyFireMs) {
           const paddleX = g.paddleX + cfg.paddleW / 2;
           const paddleY = cfg.H - cfg.paddleH - 10;
-          
-          // Calculate angle to player
-          const dx = paddleX - x;
-          const dy = paddleY - y;
-          const distance = Math.sqrt(dx*dx + dy*dy);
-          
-          if (distance > 0) {
-            const bulletDx = (dx / distance) * cfg.enemyBulletSpeed;
-            const bulletDy = (dy / distance) * cfg.enemyBulletSpeed;
-            
-            g.enemyBullets.push({ 
-              x, 
-              y: y + halfSize + 2,
-              dx: bulletDx,
-              dy: bulletDy
-            });
-            
-            // Play raygun sound effect
-            if (raygunSoundRef.current) {
-              raygunSoundRef.current.currentTime = 0; // Reset to start
-              raygunSoundRef.current.play().catch(console.error);
-            }
-            
-            // Add muzzle flash particles from saucer
-            spawnParticles(g, x, y, '#FF8844', 4, 1.8, 'explosion');
-          }
+          const vx = paddleX - x, vy = paddleY - y;
+          const mag = Math.sqrt(vx*vx + vy*vy) || 1;
+          g.enemyBullets.push({ x, y: y + half + 2, dx: (vx/mag)*cfg.enemyBulletSpeed, dy: (vy/mag)*cfg.enemyBulletSpeed });
+          if (raygunSoundRef.current) { raygunSoundRef.current.currentTime = 0; raygunSoundRef.current.play().catch(()=>{}); }
+          spawnParticles(g, x, y, '#FF8844', 4, 1.8, 'explosion');
           e.lastShot = now;
         }
-
         e.x = x; e.y = y;
         if (y < cfg.H + cfg.enemySize) out.push(e);
       }
@@ -817,37 +658,25 @@ function Ultranoid({ onClose }) {
     };
 
     const updateEnemyBullets = (g) => {
+      if (g.paused) return;
       const pTop = cfg.H - cfg.paddleH - 10;
       const out = [];
       let tookDamage = false;
-      
       for (let i = 0; i < g.enemyBullets.length; i++) {
         const b = g.enemyBullets[i];
-        
-        // Move bullet in its direction
         const nx = b.x + (b.dx || 0);
-        const ny = b.y + (b.dy || cfg.enemyBulletSpeed); // Default downward if no direction
-        
-        // Check collision with paddle (circular bullet collision)
-        const bulletRadius = cfg.enemyBulletW / 2;
-        if (ny + bulletRadius >= pTop && ny - bulletRadius <= pTop + cfg.paddleH && 
-            nx + bulletRadius >= g.paddleX && nx - bulletRadius <= g.paddleX + cfg.paddleW) {
+        const ny = b.y + (b.dy || cfg.enemyBulletSpeed);
+        const r = cfg.enemyBulletW / 2;
+        if (ny + r >= pTop && ny - r <= pTop + cfg.paddleH && nx + r >= g.paddleX && nx - r <= g.paddleX + cfg.paddleW) {
           tookDamage = true;
           spawnParticles(g, nx, pTop, '#FF88AA', 6, 2.5, 'explosion');
           continue;
         }
-        
-        // Keep bullet if still on screen
         if (nx > -10 && nx < cfg.W + 10 && ny > -10 && ny < cfg.H + 10) {
           out.push({ x: nx, y: ny, dx: b.dx, dy: b.dy });
-          
-          // Add subtle trail particles for directional bullets
-          if (b.dx && Math.random() < 0.4) {
-            spawnParticles(g, nx, ny, '#FF3322', 1, 0.5, 'trail');
-          }
+          if (b.dx && Math.random() < 0.4) spawnParticles(g, nx, ny, '#FF3322', 1, 0.5, 'trail');
         }
       }
-      
       g.enemyBullets = out;
       if (tookDamage) {
         g.health = Math.max(0, g.health - 1);
@@ -856,58 +685,48 @@ function Ultranoid({ onClose }) {
     };
 
     const updatePlayerBullets = (g) => {
-      if (g.playerBullets.length === 0) return; // Early exit
-      
+      if (g.paused || g.playerBullets.length === 0) return;
       const out = [];
-      const halfBulletW = cfg.playerBulletW / 2;
-      const halfEnemySize = cfg.enemySize / 2;
-      
+      const halfEnemy = cfg.enemySize / 2;
+
       bulletLoop:
       for (let i = 0; i < g.playerBullets.length; i++) {
         const b = g.playerBullets[i];
 
-        // Simplified brick collision
+        // Bricks
         for (let c = 0; c < cfg.brickCols; c++) {
           for (let r = 0; r < cfg.brickRows; r++) {
             const br = g.bricks[c][r];
             if (br.status !== 1) continue;
-            if (b.x > br.x && b.x < br.x + cfg.brickW && b.y < br.y + cfg.brickH && b.y + cfg.playerBulletH > br.y) {
+            const bw = b.isBig ? cfg.bigBulletW : cfg.playerBulletW;
+            const bh = b.isBig ? cfg.bigBulletH : cfg.playerBulletH;
+            if (b.x > br.x && b.x < br.x + cfg.brickW && b.y < br.y + cfg.brickH && b.y + bh > br.y) {
+              const dmg = b.damage || 1;
               const ratio = br.health / 4;
-              const col =
-                ratio === 1 ? '#0095DD' :
-                ratio === 0.75 ? '#00DD95' :
-                ratio === 0.5 ? '#DDDD00' : '#DD4400';
-              spawnParticles(g, b.x, b.y, col, 3, 2); // Fewer particles
-              br.health -= 1;
+              const col = ratio === 1 ? '#0095DD' : ratio === 0.75 ? '#00DD95' : ratio === 0.5 ? '#DDDD00' : '#DD4400';
+              spawnParticles(g, b.x, b.y, col, 3 + (dmg-1)*2, 2 + (dmg-1), dmg > 1 ? 'explosion' : 'normal');
+              br.health -= dmg;
               if (br.health <= 0) {
-                br.status = 0;
-                g.score += 1;
-                spawnParticles(g, br.x + cfg.brickW / 2, br.y + cfg.brickH / 2, col, 6, 2.5, 'explosion');
+                br.status = 0; g.score += 1;
+                spawnParticles(g, br.x + cfg.brickW / 2, br.y + cfg.brickH / 2, col, 6 + (dmg-1)*3, 2.5 + (dmg-1), 'explosion');
               }
-              
-              // Play blip sound for block hit
-              if (blipSoundRef.current) {
-                blipSoundRef.current.currentTime = 0;
-                blipSoundRef.current.play().catch(console.error);
-              }
-              
+              if (blipSoundRef.current) { blipSoundRef.current.currentTime = 0; blipSoundRef.current.play().catch(()=>{}); }
               continue bulletLoop;
             }
           }
         }
 
-        // Simplified enemy collision
+        // Enemies
         for (let j = 0; j < g.enemies.length; j++) {
           const e = g.enemies[j];
-          const dx = b.x - e.x;
-          const dy = b.y - e.y;
-          if (dx*dx + dy*dy <= halfEnemySize*halfEnemySize) { // Simple distance check
-            spawnParticles(g, b.x, b.y, '#FF4466', 3, 2);
-            e.health -= 1;
-            e.flashTime = 12; 
+          const dx = b.x - e.x, dy = b.y - e.y;
+          if (dx*dx + dy*dy <= halfEnemy*halfEnemy) {
+            const dmg = b.damage || 1;
+            spawnParticles(g, b.x, b.y, '#FF4466', 3 + (dmg-1)*2, 2 + (dmg-1));
+            e.health -= dmg; e.flashTime = 12;
             if (e.health <= 0) {
               g.score += 2;
-              spawnParticles(g, e.x, e.y, '#FF0044', 8, 3, 'explosion');
+              spawnParticles(g, e.x, e.y, '#FF0044', 8 + (dmg-1)*4, 3 + (dmg-1), 'explosion');
               g.enemies.splice(j, 1);
             }
             continue bulletLoop;
@@ -915,130 +734,104 @@ function Ultranoid({ onClose }) {
         }
 
         // Move bullet
-        const ny = b.y - cfg.playerBulletSpeed;
-        if (ny > 0) out.push({ x: b.x, y: ny });
+        const speed = b.isBig ? cfg.bigBulletSpeed : cfg.playerBulletSpeed;
+        const ny = b.y - speed;
+        if (ny > 0) out.push({ ...b, y: ny });
       }
       g.playerBullets = out;
     };
 
     const updateParticles = (g) => {
-      // Extremely optimized particle update
       const particles = g.particles;
       let activeCount = 0;
-      
       for (let i = 0; i < particles.length && activeCount < 50; i++) {
         const p = particles[i];
         if (!p.active) continue;
-        
-        p.x += p.dx; 
-        p.y += p.dy;
-        p.dx *= 0.95; // More aggressive friction
-        p.dy *= 0.95;
-        p.life -= 1.5; // Faster decay
-        
-        if (p.life <= 0) {
-          p.active = false;
-        } else {
-          activeCount++;
-        }
+        p.x += p.dx; p.y += p.dy;
+        p.dx *= 0.95; p.dy *= 0.95;
+        p.life -= 1.5;
+        if (p.life <= 0) p.active = false;
+        else activeCount++;
       }
     };
 
     const checkLevelComplete = (g) => {
-      // Check if all bricks are destroyed
-      let bricksRemaining = 0;
-      for (let c = 0; c < cfg.brickCols; c++) {
-        for (let r = 0; r < cfg.brickRows; r++) {
-          if (g.bricks[c][r].status === 1) {
-            bricksRemaining++;
-          }
-        }
-      }
-      
-      if (bricksRemaining === 0) {
-        // Level complete!
-        g.level += 1;
-        g.score += 50; // Bonus points for completing level
-        
-        // Create celebration particles
+      let remaining = 0;
+      for (let c = 0; c < cfg.brickCols; c++) for (let r = 0; r < cfg.brickRows; r++) if (g.bricks[c][r].status === 1) remaining++;
+      if (remaining === 0) {
+        g.level += 1; g.score += 50;
         spawnParticles(g, cfg.W/2, cfg.H/2, '#00FF00', 20, 4, 'explosion');
         spawnParticles(g, cfg.W/4, cfg.H/3, '#FFFF00', 15, 3, 'explosion');
         spawnParticles(g, 3*cfg.W/4, cfg.H/3, '#FF00FF', 15, 3, 'explosion');
-        
-        // Generate new bricks for next level
-        const newBricks = initBricks();
-        // Make bricks slightly harder each level (more health)
-        const extraHealth = Math.min(3, Math.floor((g.level - 1) / 2));
-        for (let c = 0; c < cfg.brickCols; c++) {
-          for (let r = 0; r < cfg.brickRows; r++) {
-            newBricks[c][r].health = 4 + extraHealth;
-          }
-        }
-        g.bricks = newBricks;
-        
-        // Clear enemies and bullets for fresh start
-        g.enemies = [];
-        g.enemyBullets = [];
-        g.playerBullets = [];
-        
-        // Reset ball position but keep it moving
-        g.ball.x = 240;
-        g.ball.y = 240;
-        g.ball.dx = cfg.ballSpeed;
-        g.ball.dy = -cfg.ballSpeed;
-        
-        // Play blip sound for level completion
-        if (blipSoundRef.current) {
-          blipSoundRef.current.currentTime = 0;
-          blipSoundRef.current.play().catch(console.error);
-        }
+        const nb = initBricks();
+        const extra = Math.min(3, Math.floor((g.level - 1) / 2));
+        for (let c = 0; c < cfg.brickCols; c++) for (let r = 0; r < cfg.brickRows; r++) nb[c][r].health = 4 + extra;
+        g.bricks = nb;
+        g.enemies = []; g.enemyBullets = []; g.playerBullets = [];
+        g.ball.x = 240; g.ball.y = 240; g.ball.dx = cfg.ballSpeed; g.ball.dy = -cfg.ballSpeed;
+        if (blipSoundRef.current) { blipSoundRef.current.currentTime = 0; blipSoundRef.current.play().catch(()=>{}); }
       }
+    };
+
+    // Auto-fire big shot at full charge
+    const checkChargeAutoFire = (g) => {
+      if (!g.isCharging || g.paused) return;
+      const elapsed = performance.now() - g.chargeStart;
+      if (elapsed >= cfg.chargeTimeMs && !g.chargeFired) {
+        fireBullet(g, true); // big bullet
+        g.isCharging = false;
+        g.chargeFired = true;
+        if (chargeHumRef.current) { try { chargeHumRef.current.pause(); } catch {} }
+      }
+    };
+
+    const fireBullet = (g, isBig = false) => {
+      const x = g.paddleX + cfg.paddleW / 2;
+      const y = cfg.H - cfg.paddleH - 20;
+      if (isBig) {
+        g.playerBullets.push({ x, y, isBig: true, damage: cfg.bigBulletDamage });
+      } else {
+        g.playerBullets.push({ x, y, isBig: false, damage: 1 });
+      }
+      if (laserSoundRef.current) { laserSoundRef.current.currentTime = 0; laserSoundRef.current.play().catch(()=>{}); }
+      spawnParticles(g, x, y, isBig ? cfg.bigBulletColor : '#FFFFAA', isBig ? 8 : 3, isBig ? 2.2 : 1.5, 'explosion');
     };
 
     const loop = () => {
       const g = gameRef.current;
       if (!g) return;
 
-      // Clear with darker blue background
-      ctx.fillStyle = 'rgba(0, 10, 25, 1)'; // Much darker blue
+      // Clear
+      ctx.fillStyle = 'rgba(0, 10, 25, 1)';
       ctx.fillRect(0, 0, cfg.W, cfg.H);
 
-      // Always draw starfield background for space effect
       drawBackground(g);
-      
-      // Core gameplay rendering only
       drawBricks(g);
       drawPaddle(g);
       drawBall(g);
       drawPlayerBullets(g);
       drawEnemies(g);
       drawEnemyBullets(g);
-      
-      // Conditional particle rendering
-      if (g.particles.some(p => p.active)) {
-        drawParticles(g);
-      }
-      
+      if (g.particles.some(p => p.active)) drawParticles(g);
       drawHUD(g);
 
-      // Update game state
+      // Update
       updateBall(g);
       spawnEnemies(g);
       updateEnemies(g);
       updateEnemyBullets(g);
       updatePlayerBullets(g);
       updateParticles(g);
-      
-      // Check for level completion
       checkLevelComplete(g);
+      checkChargeAutoFire(g);
 
-      // Reduce UI update frequency even more
+      // Throttle HUD
       const now = performance.now();
       if (now - lastUiPush > 150) {
         lastUiPush = now;
         setUi(prev => {
-          if (prev.score !== g.score || prev.health !== g.health || prev.started !== g.started || prev.level !== g.level) {
-            return { score: g.score, health: g.health, started: g.started, level: g.level };
+          if (prev.score !== g.score || prev.health !== g.health || prev.started !== g.started || prev.level !== g.level || prev.paused !== g.paused) {
+            return { score: g.score, health: g.health, started: g.started, level: g.level, paused: g.paused };
           }
           return prev;
         });
@@ -1049,7 +842,7 @@ function Ultranoid({ onClose }) {
 
     rafRef.current = requestAnimationFrame(loop);
     return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
-  }, [cfg, resetGame]);
+  }, [cfg, resetGame, initBricks]);
 
   // Input
   const onCanvasMouseMove = (e) => {
@@ -1058,34 +851,67 @@ function Ultranoid({ onClose }) {
     if (!canvas || !g) return;
     const rect = canvas.getBoundingClientRect();
     const rx = e.clientX - rect.left;
-    if (rx > 0 && rx < cfg.W) {
-      g.paddleX = clamp(rx - cfg.paddleW / 2, 0, cfg.W - cfg.paddleW);
-    }
+    if (rx > 0 && rx < cfg.W) g.paddleX = clamp(rx - cfg.paddleW / 2, 0, cfg.W - cfg.paddleW);
   };
 
-  const onCanvasClick = () => {
+  // NEW: charge-shot input
+  const startChargingIfNeeded = () => {
     const g = gameRef.current;
     if (!g) return;
-    
-    // Start music on first click if not already playing
-    if (audioRef.current && audioRef.current.paused) {
-      audioRef.current.play().catch(console.error);
-    }
-    
+    // start music on first interaction
+    if (audioRef.current && audioRef.current.paused) { audioRef.current.play().catch(()=>{}); }
+
     if (!g.started) {
       g.started = true;
       setUi(prev => ({ ...prev, started: true }));
-    } else {
-      const bulletX = g.paddleX + cfg.paddleW / 2;
-      const bulletY = cfg.H - cfg.paddleH - 20;
-      g.playerBullets.push({ x: bulletX, y: bulletY });
-      
-      // Play laser sound effect
-      if (laserSoundRef.current) {
-        laserSoundRef.current.currentTime = 0; // Reset to start
-        laserSoundRef.current.play().catch(console.error);
+      return;
+    }
+    if (!g.isCharging) {
+      g.isCharging = true;
+      g.chargeStart = performance.now();
+      g.chargeFired = false;
+      // play charge hum softly
+      if (chargeHumRef.current) {
+        try { chargeHumRef.current.currentTime = 0; chargeHumRef.current.play(); } catch {}
       }
     }
+  };
+
+  const releaseChargeOrShoot = () => {
+    const g = gameRef.current;
+    if (!g || !g.started) return;
+
+    // If we already auto-fired at full charge, nothing to do
+    if (g.chargeFired) { g.isCharging = false; g.chargeFired = false; return; }
+
+    const held = performance.now() - (g.chargeStart || 0);
+    const fullyCharged = held >= cfg.chargeTimeMs;
+
+    // stop charge hum
+    if (chargeHumRef.current) { try { chargeHumRef.current.pause(); } catch {} }
+
+    if (g.isCharging) {
+      // Fire big if fully charged; else normal
+      const isBig = fullyCharged;
+      // eslint-disable-next-line no-use-before-define
+      fireImmediate(g, isBig);
+    } else {
+      // quick tap (if not in charging state for some reason)
+      // eslint-disable-next-line no-use-before-define
+      fireImmediate(g, false);
+    }
+    g.isCharging = false;
+    g.chargeFired = false;
+  };
+
+  // local wrapper used by release and auto
+  const fireImmediate = (g, isBig) => {
+    const x = g.paddleX + cfg.paddleW / 2;
+    const y = cfg.H - cfg.paddleH - 20;
+    if (isBig) g.playerBullets.push({ x, y, isBig: true, damage: cfg.bigBulletDamage });
+    else g.playerBullets.push({ x, y, isBig: false, damage: 1 });
+    if (laserSoundRef.current) { laserSoundRef.current.currentTime = 0; laserSoundRef.current.play().catch(()=>{}); }
+    spawnParticles(g, x, y, isBig ? cfg.bigBulletColor : '#FFFFAA', isBig ? 8 : 3, isBig ? 2.2 : 1.5, 'explosion');
   };
 
   // initial placement
@@ -1100,7 +926,7 @@ function Ultranoid({ onClose }) {
   return (
     <div
       ref={wrapRef}
-      onMouseDown={onMouseDown}
+      onMouseDown={onMouseDownShell}
       style={{
         position: 'fixed',
         width: '520px',
@@ -1167,7 +993,15 @@ function Ultranoid({ onClose }) {
 
         <div style={{ display: 'flex', gap: '8px' }}>
           <button
-            onClick={resetGame}
+            onClick={() => {
+              const g = gameRef.current;
+              if (g && g.started) {
+                g.paused = !g.paused;
+                setUi(prev => ({ ...prev, paused: g.paused }));
+              } else {
+                resetGame();
+              }
+            }}
             style={{
               width: '32px',
               height: '32px',
@@ -1182,9 +1016,9 @@ function Ultranoid({ onClose }) {
               fontSize: '14px',
               transition: 'all 0.2s ease'
             }}
-            title="Reset Game"
+            title={gameRef.current?.started ? (ui.paused ? "Resume Game" : "Pause Game") : "Reset Game"}
           >
-            🔄
+            {gameRef.current?.started ? (ui.paused ? '▶️' : '⏸️') : '🔄'}
           </button>
 
           <button
@@ -1229,7 +1063,8 @@ function Ultranoid({ onClose }) {
             cursor: 'crosshair'
           }}
           onMouseMove={onCanvasMouseMove}
-          onClick={onCanvasClick}
+          onMouseDown={startChargingIfNeeded}
+          onMouseUp={releaseChargeOrShoot}
         />
       </div>
     </div>

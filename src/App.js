@@ -5,7 +5,7 @@ import Window from "./components/Window";
 import DesktopIcon from "./components/DesktopIcon";
 import HackerTerminal from "./components/HackerTerminal";
 import Calculator from "./components/Calculator";
-import Arkanoid from "./components/Arkanoid";
+import Arkanoid from "./components/Arkanoid"; // if your game component is actually named Ultranoid, switch this import too
 import PipesScreensaver from "./components/PipesScreensaver";
 import {
   AboutMeContent,
@@ -29,32 +29,26 @@ const App = () => {
   const [icons, setIcons] = useState([
     { id: 1, name: "Hacker Typer Game", icon: "💻", content: "Documents Content", position: { x: 20, y: 130 } },
     { id: 2, name: "Calculator", icon: "🧮", content: "Projects Content", position: { x: 20, y: 230 } },
-    { id: 3, name: "Arkanoid", icon: "🧱", content: "Arkanoid Content", position: { x: 20, y: 330 } },
+    // Renamed Arkanoid -> Ultranoid
+    { id: 3, name: "Ultranoid", icon: "🧱", content: "Arkanoid Content", position: { x: 20, y: 330 } },
     { id: 4, name: "3D Pipes Screensaver", icon: "�", content: "Screensaver Content", position: { x: 20, y: 430 } },
   ]);
-  const [booted, setBooted] = useState(false); // Controls the boot sequence - RESTORED
-  const [fadeInStage, setFadeInStage] = useState(0); // Tracks which elements are fading in - START FROM BEGINNING
-  const [buttonVisible, setButtonVisible] = useState(true); // Controls the button visibility - SHOW BOOT BUTTON
-  const [blackScreenOpacity, setBlackScreenOpacity] = useState(1); // Controls the black screen fade-out - START WITH BLACK SCREEN
-  // Sound configurations
+  const [booted, setBooted] = useState(false);
+  const [fadeInStage, setFadeInStage] = useState(0);
+  const [buttonVisible, setButtonVisible] = useState(true);
+  const [blackScreenOpacity, setBlackScreenOpacity] = useState(1);
+
+  // Sounds
   const bootSound = new Howl({
     src: ["/bootup.mp3"],
     volume: 0.5,
     format: ['mp3'],
-    html5: false, // Use Web Audio API instead of HTML5 for better compatibility
+    html5: false,
     preload: true,
-    onload: () => {
-      console.log("Boot sound loaded successfully");
-    },
-    onloaderror: (id, error) => {
-      console.log("Boot sound load error:", error);
-    },
-    onplay: () => {
-      console.log("Boot sound playing");
-    },
-    onplayerror: (id, error) => {
-      console.log("Boot sound play error:", error);
-    }
+    onload: () => { console.log("Boot sound loaded successfully"); },
+    onloaderror: (id, error) => { console.log("Boot sound load error:", error); },
+    onplay: () => { console.log("Boot sound playing"); },
+    onplayerror: (id, error) => { console.log("Boot sound play error:", error); }
   });
 
   const whooshSound = new Howl({
@@ -63,23 +57,12 @@ const App = () => {
     format: ['wav'],
     html5: false,
     preload: true,
-    onloaderror: (id, error) => {
-      console.log("Whoosh sound load error:", error);
-    }
+    onloaderror: (id, error) => { console.log("Whoosh sound load error:", error); }
   });
-
-  // const music = new Howl({
-  //   src: ["/music.mp3"],
-  //   volume: 0.65, // 65% volume
-  //   loop: true,
-  // });
 
   const openWindow = (itemName) => {
     if (audio) {
-      const whooshSound = new Howl({
-        src: ["/whoosh.wav"],
-        volume: 0.9,
-      });
+      const whooshSound = new Howl({ src: ["/whoosh.wav"], volume: 0.9 });
       whooshSound.play();
     }
 
@@ -95,8 +78,9 @@ const App = () => {
       setShowHackerTerminal(true);
     } else if (itemName === "Calculator") {
       setShowCalculator(true);
-    } else if (itemName === "Arkanoid") {
-      setShowArkanoid(true);
+    // Change trigger to "Ultranoid"
+    } else if (itemName === "Ultranoid") {
+      setShowArkanoid(true); // this still renders your Arkanoid/Ultranoid component
     } else if (itemName === "3D Pipes Screensaver") {
       setShowScreensaver(true);
     } else {
@@ -122,32 +106,22 @@ const App = () => {
           content = <div>Content not found</div>;
       }
       
+      // 30% bigger (520x480 → 676x624)
       setWindows([{
         id: Date.now(),
         title: itemName,
         content: content,
-        width: 520,
-        height: 480
+        width: 676,
+        height: 624
       }]);
       setActiveWindow(itemName);
     }
   };
 
-  const closeWindow = (id) => {
-    setWindows((prev) => prev.filter((win) => win.id !== id));
-  };
-
-  const closeCalculator = () => {
-    setShowCalculator(false);
-  };
-
-  const closeArkanoid = () => {
-    setShowArkanoid(false);
-  };
-
-  const closeScreensaver = () => {
-    setShowScreensaver(false);
-  };
+  const closeWindow = (id) => setWindows((prev) => prev.filter((win) => win.id !== id));
+  const closeCalculator = () => setShowCalculator(false);
+  const closeArkanoid = () => setShowArkanoid(false);
+  const closeScreensaver = () => setShowScreensaver(false);
 
   const handleIconDrag = (id, e) => {
     const iconIndex = icons.findIndex((icon) => icon.id === id);
@@ -158,36 +132,25 @@ const App = () => {
     const newY = newIcons[iconIndex].position.y + e.movementY;
 
     if (newY < dockHeight) {
-      // Don't move the icon into the dock area - keep Y position unchanged
       newIcons[iconIndex].position.x = newX;
     } else {
       newIcons[iconIndex].position.x = newX;
       newIcons[iconIndex].position.y = newY;
     }
-
     setIcons(newIcons);
   };
 
   const handleBoot = () => {
     console.log("Boot button clicked - attempting to play sound");
-    
-    // Immediately try to play the sound when user clicks (user interaction)
-    try {
-      console.log("Playing boot sound immediately...");
-      bootSound.play();
-    } catch (error) {
-      console.log("Boot sound immediate play error:", error);
-    }
+    try { bootSound.play(); } catch (error) { console.log("Boot sound immediate play error:", error); }
 
-    // Start fade-in sequence - SarahOS text appears IMMEDIATELY
-    setFadeInStage(1); // Fade in SarahOS text RIGHT NOW - no setTimeout
-    setTimeout(() => setFadeInStage(2), 600); // Icons at 0.6 seconds 
-    setTimeout(() => setFadeInStage(3), 1200); // Dock at 0.7 seconds
+    setFadeInStage(1);
+    setTimeout(() => setFadeInStage(2), 600);
+    setTimeout(() => setFadeInStage(3), 1200);
 
-    // Fade out the black screen and make the button disappear
-    setTimeout(() => setBlackScreenOpacity(0), 200); // Start fading out the black screen
-    setTimeout(() => setButtonVisible(false), 100); // Hide the button visually
-    setTimeout(() => setBooted(true), 2900); // Remove the black screen after all animations complete
+    setTimeout(() => setBlackScreenOpacity(0), 200);
+    setTimeout(() => setButtonVisible(false), 100);
+    setTimeout(() => setBooted(true), 2900);
   };
 
   return (
@@ -248,10 +211,10 @@ const App = () => {
         }}
       >
         <h1 className="text-white font-bold text-center" style={{
-          fontSize: "4rem", // More controlled size
+          fontSize: "4rem",
           fontFamily: "'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
           fontWeight: "700",
-          letterSpacing: "-0.02em", // Tighter letter spacing for premium look
+          letterSpacing: "-0.02em",
           textShadow: "0 4px 8px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2)",
         }}>
           <span>Sarah</span>
@@ -302,14 +265,10 @@ const App = () => {
               };
               document.addEventListener("mousemove", onDrag);
               document.addEventListener("mouseup", onDragEnd);
-              e.preventDefault(); // Prevent text selection
+              e.preventDefault();
             }}
             onMouseEnter={() => {
-              try {
-                whooshSound.play();
-              } catch (error) {
-                console.log("Whoosh sound play error:", error);
-              }
+              try { whooshSound.play(); } catch (error) { console.log("Whoosh sound play error:", error); }
             }}
           >
             <DesktopIcon
@@ -363,7 +322,7 @@ const App = () => {
       {/* Calculator */}
       {showCalculator && <Calculator onClose={closeCalculator} />}
 
-      {/* Arkanoid Game */}
+      {/* Ultranoid (uses your Arkanoid component unless you rename/import Ultranoid) */}
       {showArkanoid && <Arkanoid onClose={closeArkanoid} />}
 
       {/* 3D Pipes Screensaver */}
