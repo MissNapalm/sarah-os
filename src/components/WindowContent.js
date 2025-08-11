@@ -1,11 +1,5 @@
 import React from "react";
-import mangioneImage from "../images/mangione.png";
-import aupticonImage from "../images/aupticon.png";
-import ariaImage from "../images/aria.png";
-import heliosImage from "../images/helios.png";
-import antibodyImage from "../images/antibody.png";
-import fluidImage from "../images/fluid.png";
-import spaghettiImage from "./spaghetti.png";
+
 
 export const AboutMeContent = () => (
   <div style={{
@@ -416,7 +410,7 @@ export const EthicalHacksContent = () => (
         border: '1px solid #3e3e42',
       }}>
         <img 
-          src={aupticonImage}
+          src="/aupticon.png"
           alt="Self-Driving Car Dashboard"
           style={{
             width: '100%',
@@ -560,7 +554,7 @@ export const EthicalHacksContent = () => (
         border: '1px solid #3e3e42',
       }}>
         <img 
-          src={ariaImage}
+          src="/aria.png"
           alt="ARIA ElevenLabs Digital Assistant"
           style={{
             width: '100%',
@@ -570,12 +564,6 @@ export const EthicalHacksContent = () => (
             marginBottom: '12px',
             transition: 'transform 0.3s ease',
             cursor: 'pointer',
-          }}
-          onMouseOver={(e) => {
-            // No scaling effect
-          }}
-          onMouseOut={(e) => {
-            // No scaling effect
           }}
           onError={(e) => {
             console.log('Image failed to load:', e.target.src);
@@ -628,7 +616,7 @@ export const EthicalHacksContent = () => (
         border: '1px solid #3e3e42',
       }}>
         <img 
-          src={heliosImage}
+          src="/helios.png"
           alt="HELIOS Local Ollama LLM"
           style={{
             width: '100%',
@@ -638,12 +626,6 @@ export const EthicalHacksContent = () => (
             marginBottom: '12px',
             transition: 'transform 0.3s ease',
             cursor: 'pointer',
-          }}
-          onMouseOver={(e) => {
-            // No scaling effect
-          }}
-          onMouseOut={(e) => {
-            // No scaling effect
           }}
           onError={(e) => {
             console.log('Image failed to load:', e.target.src);
@@ -715,7 +697,7 @@ export const EthicalHacksContent = () => (
         border: '1px solid #3e3e42',
       }}>
         <img 
-          src={fluidImage}
+          src="/fluid.png"
           alt="Fluid Dynamics Physics Playground"
           style={{
             width: '100%',
@@ -725,12 +707,6 @@ export const EthicalHacksContent = () => (
             marginBottom: '12px',
             transition: 'transform 0.3s ease',
             cursor: 'pointer',
-          }}
-          onMouseOver={(e) => {
-            // No scaling effect
-          }}
-          onMouseOut={(e) => {
-            // No scaling effect
           }}
           onError={(e) => {
             console.log('Image failed to load:', e.target.src);
@@ -783,7 +759,7 @@ export const EthicalHacksContent = () => (
         border: '1px solid #3e3e42',
       }}>
         <img 
-          src={antibodyImage}
+          src="/antibody.png"
           alt="Antibody"
           style={{
             width: '100%',
@@ -793,12 +769,6 @@ export const EthicalHacksContent = () => (
             marginBottom: '12px',
             transition: 'transform 0.3s ease',
             cursor: 'pointer',
-          }}
-          onMouseOver={(e) => {
-            // No scaling effect
-          }}
-          onMouseOut={(e) => {
-            // No scaling effect
           }}
           onError={(e) => {
             console.log('Image failed to load:', e.target.src);
