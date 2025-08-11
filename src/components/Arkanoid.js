@@ -42,13 +42,13 @@ function Ultranoid({ onClose }) {
     // Player bullets
     playerBulletW: 3,
     playerBulletH: 10,
-    playerBulletSpeed: 3,
+    playerBulletSpeed: 3.9, // 30% faster (3 * 1.3 = 3.9)
 
     // BIG charge shot (auto-fires after 3s of hold)
     chargeTimeMs: 3000,
     bigBulletW: 8,
     bigBulletH: 22,
-    bigBulletSpeed: 3.2,
+    bigBulletSpeed: 4.16, // 30% faster (3.2 * 1.3 = 4.16)
     bigBulletDamage: 2,    // <- double damage
     bigBulletColor: '#80FFEA',
 
@@ -1063,8 +1063,29 @@ function Ultranoid({ onClose }) {
             cursor: 'crosshair'
           }}
           onMouseMove={onCanvasMouseMove}
-          onMouseDown={startChargingIfNeeded}
-          onMouseUp={releaseChargeOrShoot}
+          onClick={() => {
+            const g = gameRef.current;
+            if (!g) return;
+            
+            // Start music on first click
+            if (audioRef.current && audioRef.current.paused) {
+              audioRef.current.play().catch(() => {});
+            }
+            
+            if (!g.started) {
+              g.started = true;
+              setUi(prev => ({ ...prev, started: true }));
+            } else if (!g.paused) {
+              // Fire normal bullet on click
+              const x = g.paddleX + cfg.paddleW / 2;
+              const y = cfg.H - cfg.paddleH - 20;
+              g.playerBullets.push({ x, y, isBig: false, damage: 1 });
+              if (laserSoundRef.current) {
+                laserSoundRef.current.currentTime = 0;
+                laserSoundRef.current.play().catch(() => {});
+              }
+            }
+          }}
         />
       </div>
     </div>

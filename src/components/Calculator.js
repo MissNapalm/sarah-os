@@ -8,7 +8,6 @@ const Calculator = ({ onClose }) => {
   const [dragging, setDragging] = useState(false);
   const dragOffset = useRef({ x: 0, y: 0 });
 
-  // Calculator state
   const [display, setDisplay] = useState('0');
   const [previousValue, setPreviousValue] = useState(null);
   const [operation, setOperation] = useState(null);
@@ -143,164 +142,42 @@ const Calculator = ({ onClose }) => {
 
   return (
     <div
+      className="calculator-window fixed"
       style={{
-        position: "absolute",
         left: `${position.x}px`,
         top: `${position.y}px`,
-        width: "300px",
-        height: "420px",
-        background: "linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%)",
-        backdropFilter: "blur(20px) saturate(180%)",
-        borderRadius: "20px",
-        padding: "15px",
-        zIndex: 1003,
-        boxShadow: `
-          0 25px 50px -12px rgba(0, 0, 0, 0.6),
-          0 8px 16px -8px rgba(0, 0, 0, 0.3),
-          inset 0 1px 0 rgba(255, 255, 255, 0.1),
-          0 0 0 1px rgba(255, 255, 255, 0.05)
-        `,
-        border: "1px solid rgba(255, 255, 255, 0.1)",
-        animation: "windowAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
-        userSelect: "none",
-        cursor: dragging ? "grabbing" : "grab",
-        display: "flex",
-        flexDirection: "column"
+        zIndex: 1003
       }}
       onMouseDown={handleMouseDown}
     >
-      {/* Close button */}
-      <button
-        className="calc-close-btn"
-        onClick={onClose}
-        style={{
-          position: "absolute",
-          top: "15px",
-          right: "15px",
-          width: "20px",
-          height: "20px",
-          borderRadius: "50%",
-          border: "none",
-          background: "linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)",
-          cursor: "pointer",
-          transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-          opacity: 0.8,
-          boxShadow: "0 2px 8px rgba(255, 107, 107, 0.3)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "12px",
-          color: "white",
-          fontWeight: "bold"
-        }}
-        onMouseEnter={(e) => {
-          e.target.style.opacity = "1";
-          e.target.style.transform = "scale(1.1)";
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.opacity = "0.8";
-          e.target.style.transform = "scale(1)";
-        }}
-      >
-        ×
-      </button>
-
-      {/* Calculator title */}
-      <div style={{
-        textAlign: "center",
-        fontSize: "14px",
-        fontWeight: "600",
-        color: "#ffffff",
-        marginBottom: "10px",
-        fontFamily: "'Inter', sans-serif",
-        opacity: 0.9
-      }}>
-        ✨ Sarah's Calculator ✨
+      <div className="window-header flex items-center justify-between mb-2 select-none cursor-grab">
+        <div className="window-header-buttons">
+          {/* Close button */}
+          <div
+            className="window-header-button close"
+            onClick={onClose}
+            title="Close"
+          />
+          {/* ...other buttons... */}
+        </div>
+        {/* Calculator title */}
+        <div className="calculator-title font-bold text-base text-white flex-1 text-center">
+          Calculator
+        </div>
       </div>
 
       {/* Display */}
-      <div style={{
-        background: "linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%)",
-        color: "#ffffff",
-        padding: "15px",
-        borderRadius: "12px",
-        marginBottom: "15px",
-        textAlign: "right",
-        fontSize: "28px",
-        fontFamily: "'SF Mono', 'Monaco', 'Cascadia Code', monospace",
-        fontWeight: "300",
-        minHeight: "40px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "flex-end",
-        boxShadow: "inset 0 4px 8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05)",
-        border: "1px solid rgba(255, 255, 255, 0.1)",
-        overflow: "hidden",
-        wordBreak: "break-all"
-      }}>
+      <div className="calculator-display bg-gray-800 text-white text-2xl rounded-lg px-4 py-3 mb-4 text-right min-h-[40px] tracking-wider shadow-inner">
         {display.length > 10 ? display.slice(-10) : display}
       </div>
       
       {/* Buttons */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(4, 1fr)",
-        gap: "8px",
-        flex: 1
-      }}>
+      <div className="calculator-buttons grid grid-cols-4 gap-2">
         {buttons.map((button, index) => (
           <button
             key={index}
-            className="calc-button"
+            className={`calc-button ${button.className} bg-gray-700 text-white rounded-lg py-3 text-lg font-medium hover:bg-gray-600 transition`}
             onClick={button.onClick}
-            style={{
-              height: "45px",
-              border: "none",
-              borderRadius: "10px",
-              fontSize: "16px",
-              fontWeight: "600",
-              cursor: "pointer",
-              transition: "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
-              gridColumn: button.className.includes('zero') ? "span 2" : "auto",
-              background: button.className.includes('operator') 
-                ? "linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)"
-                : button.className.includes('function') || button.className.includes('clear')
-                ? "linear-gradient(135deg, #4a4a4a 0%, #5a5a5a 100%)"
-                : "linear-gradient(135deg, #2a2a2a 0%, #3a3a3a 100%)",
-              color: "white",
-              textShadow: "0 1px 2px rgba(0, 0, 0, 0.5)",
-              boxShadow: `
-                0 4px 12px rgba(0, 0, 0, 0.3), 
-                inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                0 0 0 1px rgba(255, 255, 255, 0.05)
-              `,
-              userSelect: "none",
-              border: "1px solid rgba(255, 255, 255, 0.1)"
-            }}
-            onMouseDown={(e) => {
-              e.target.style.transform = "scale(0.95)";
-              e.target.style.boxShadow = `
-                0 2px 8px rgba(0, 0, 0, 0.4), 
-                inset 0 2px 4px rgba(0, 0, 0, 0.3),
-                0 0 0 1px rgba(255, 255, 255, 0.05)
-              `;
-            }}
-            onMouseUp={(e) => {
-              e.target.style.transform = "scale(1)";
-              e.target.style.boxShadow = `
-                0 4px 12px rgba(0, 0, 0, 0.3), 
-                inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                0 0 0 1px rgba(255, 255, 255, 0.05)
-              `;
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = "scale(1)";
-              e.target.style.boxShadow = `
-                0 4px 12px rgba(0, 0, 0, 0.3), 
-                inset 0 1px 0 rgba(255, 255, 255, 0.1),
-                0 0 0 1px rgba(255, 255, 255, 0.05)
-              `;
-            }}
           >
             {button.label}
           </button>

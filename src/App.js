@@ -78,11 +78,14 @@ const App = () => {
       setShowHackerTerminal(true);
     } else if (itemName === "Calculator") {
       setShowCalculator(true);
-    // Change trigger to "Ultranoid"
     } else if (itemName === "Ultranoid") {
-      setShowArkanoid(true); // this still renders your Arkanoid/Ultranoid component
+      setShowArkanoid(true);
     } else if (itemName === "3D Pipes Screensaver") {
       setShowScreensaver(true);
+    } else if (itemName === "Resume") {
+      // Open FlowCV resume in a new tab
+      window.open("https://flowcv.com/resume/u2ckr5r2ktsk", "_blank", "noopener,noreferrer");
+      return;
     } else {
       // Create window for standard dock items
       let content;
@@ -98,9 +101,6 @@ const App = () => {
           break;
         case "Security":
           content = <NonprofitContent />;
-          break;
-        case "Resume":
-          content = <SettingsContent />;
           break;
         default:
           content = <div>Content not found</div>;

@@ -5,6 +5,7 @@ import ariaImage from "../images/aria.png";
 import heliosImage from "../images/helios.png";
 import antibodyImage from "../images/antibody.png";
 import fluidImage from "../images/fluid.png";
+import spaghettiImage from "./spaghetti.png";
 
 export const AboutMeContent = () => (
   <div style={{
@@ -407,74 +408,7 @@ export const EthicalHacksContent = () => (
       gap: '16px',
       marginBottom: '30px',
     }}>
-      <div style={{
-        background: '#252526',
-        padding: '12px',
-        borderRadius: '4px',
-        border: '1px solid #3e3e42',
-      }}>
-        <img 
-          src={mangioneImage}
-          alt="Mangione's Italian Kitchen"
-          style={{
-            width: '100%',
-            height: '130px',
-            borderRadius: '4px',
-            objectFit: 'cover',
-            marginBottom: '12px',
-            transition: 'transform 0.3s ease',
-            cursor: 'pointer',
-          }}
-          onMouseOver={(e) => {
-            // No scaling effect
-          }}
-          onMouseOut={(e) => {
-            // No scaling effect
-          }}
-          onError={(e) => {
-            console.log('Image failed to load:', e.target.src);
-            e.target.style.display = 'none';
-          }}
-        />
-        <h3 style={{ 
-          fontSize: '14px', 
-          color: '#ffffff', 
-          fontWeight: '500', 
-          marginBottom: '8px',
-          fontFamily: "'Segoe UI', 'Arial', sans-serif",
-          letterSpacing: "0.3px",
-          WebkitFontSmoothing: "antialiased",
-          MozOsxFontSmoothing: "grayscale"
-        }}>
-          Mangione's Italian Kitchen
-        </h3>
-        <p style={{ 
-          fontSize: '12px', 
-          color: '#e0e0e0', 
-          marginBottom: '8px', 
-          fontWeight: '400',
-          fontFamily: "'Segoe UI', 'Arial', sans-serif",
-          letterSpacing: "0.1px",
-          lineHeight: "1.5",
-          WebkitFontSmoothing: "antialiased",
-          MozOsxFontSmoothing: "grayscale"
-        }}>
-          Full-stack restaurant website featuring online ordering, menu management, and customer portal. 
-          Built with React frontend and Node.js backend with PostgreSQL database.
-        </p>
-        <div style={{ 
-          fontSize: '10px', 
-          color: '#4fc3f7', 
-          fontWeight: '500',
-          fontFamily: "'Segoe UI', 'Arial', sans-serif",
-          letterSpacing: "0.2px",
-          WebkitFontSmoothing: "antialiased",
-          MozOsxFontSmoothing: "grayscale"
-        }}>
-          React • Node.js • PostgreSQL • Stripe Integration
-        </div>
-      </div>
-
+      {/* 1. Self-Driving Car Dashboard */}
       <div style={{
         background: '#252526',
         padding: '12px',
@@ -492,12 +426,6 @@ export const EthicalHacksContent = () => (
             marginBottom: '12px',
             transition: 'transform 0.3s ease',
             cursor: 'pointer',
-          }}
-          onMouseOver={(e) => {
-            // No scaling effect
-          }}
-          onMouseOut={(e) => {
-            // No scaling effect
           }}
           onError={(e) => {
             console.log('Image failed to load:', e.target.src);
@@ -542,6 +470,68 @@ export const EthicalHacksContent = () => (
           React • Chart.js • WebSocket • Real-time Data
         </div>
       </div>
+
+      {/* 2. New Italian Restaurant Project */}
+      <div style={{
+        background: '#252526',
+        padding: '12px',
+        borderRadius: '4px',
+        border: '1px solid #3e3e42',
+      }}>
+        <img 
+          src="/spaghetti.png"
+          alt="Trattoria Bellissimo"
+          style={{
+            width: '100%',
+            height: '130px',
+            borderRadius: '4px',
+            objectFit: 'cover',
+            marginBottom: '12px',
+            transition: 'transform 0.3s ease',
+            cursor: 'pointer',
+          }}
+          onError={(e) => {
+            console.log('Image failed to load:', e.target.src);
+            e.target.style.display = 'none';
+          }}
+        />
+        <h3 style={{ 
+          fontSize: '14px', 
+          color: '#ffffff', 
+          fontWeight: '500', 
+          marginBottom: '8px',
+          fontFamily: "'Segoe UI', 'Arial', sans-serif",
+          letterSpacing: "0.3px",
+          WebkitFontSmoothing: "antialiased",
+          MozOsxFontSmoothing: "grayscale"
+        }}>
+          Trattoria Bellissimo
+        </h3>
+        <p style={{ 
+          fontSize: '12px', 
+          color: '#e0e0e0', 
+          marginBottom: '8px', 
+          fontWeight: '400',
+          fontFamily: "'Segoe UI', 'Arial', sans-serif",
+          letterSpacing: "0.1px",
+          lineHeight: "1.5",
+          WebkitFontSmoothing: "antialiased",
+          MozOsxFontSmoothing: "grayscale"
+        }}>
+          Web application for a local Italian restaurant, featuring a dynamic menu, online ordering, and a custom admin dashboard for managing orders and inventory.
+        </p>
+        <div style={{ 
+          fontSize: '10px', 
+          color: '#4fc3f7', 
+          fontWeight: '500',
+          fontFamily: "'Segoe UI', 'Arial', sans-serif",
+          letterSpacing: "0.2px",
+          WebkitFontSmoothing: "antialiased",
+          MozOsxFontSmoothing: "grayscale"
+        }}>
+          React • Node.js • Express • MongoDB • Stripe API
+        </div>
+      </div>
     </div>
 
     <h2 style={{
@@ -552,8 +542,9 @@ export const EthicalHacksContent = () => (
       fontFamily: "'Segoe UI', 'Arial', sans-serif",
       letterSpacing: "0.5px",
       textTransform: "uppercase",
-      WebkitFontSmoothing: "antialiased",
-      MozOsxFontSmoothing: "grayscale"
+      WebkitFontSmoothing: "subpixel-antialiased",
+      MozOsxFontSmoothing: "auto",
+      textRendering: "optimizeLegibility"
     }}>Artificial Intelligence</h2>
     
     <div style={{
@@ -707,7 +698,7 @@ export const EthicalHacksContent = () => (
       fontFamily: "'Segoe UI', 'Arial', sans-serif",
       letterSpacing: "0.5px",
       textTransform: "uppercase",
-      WebkitFontSmoothing: "antialiased",
+      WebkitFontSmoothing: "subpixel-antialiased",
       MozOsxFontSmoothing: "grayscale"
     }}>Game Development (Pygame)</h2>
     
@@ -910,7 +901,7 @@ export const NonprofitContent = () => (
         },
         {
           title: 'Custom Malware Research & Development',
-          details: 'Developed "GhostKey" - a sophisticated Remote Access Trojan using screenshot exfiltration to avoid VNC detection. Features include C-transpiled Python implants for maximum AV evasion.',
+          details: 'Developed "GhostKey" - a sophisticated Remote Access Trojan using screenshot exfiltration to avoid VNC detection. Features include C-transpiled Python implants for maximum AV evasion. In 2025, also completed a lab intercepting and decrypting HTTPS traffic for advanced analysis.',
           skills: ['Python → C Transpilation', 'AV Evasion', 'C2 Infrastructure', 'Custom RAT Development']
         },
         {
@@ -1245,6 +1236,29 @@ export const CybersecurityContent = () => (
         All security research conducted under proper authorization with responsible disclosure protocols. 
         Projects focus on defensive security improvements and vulnerability remediation.
       </p>
+    </div>
+  </div>
+);
+
+export const ProjectsContent = () => (
+  <div className="projects-content">
+    {/* Spaghetti Project Entry (replaces Mangione's Kitchen) */}
+    <div className="project-entry bg-[#252526] p-5 rounded-lg border border-[#3e3e42] mb-6 flex flex-col md:flex-row items-center">
+      <img
+        src="/spaghetti.png"
+        alt="Spaghetti"
+        className="w-32 h-32 object-cover rounded-lg mb-4 md:mb-0 md:mr-6 border border-[#444]"
+        style={{ flexShrink: 0 }}
+      />
+      <div>
+        <h2 className="text-xl font-bold text-white mb-2">Spaghetti</h2>
+        <p className="text-sm text-gray-300 mb-2">
+          Web application for a local Italian restaurant, featuring a dynamic menu, online ordering, and a custom admin dashboard for managing orders and inventory.
+        </p>
+        <div className="text-xs text-[#dc3545] font-semibold">
+          React • Node.js • Express • MongoDB • Stripe API
+        </div>
+      </div>
     </div>
   </div>
 );
